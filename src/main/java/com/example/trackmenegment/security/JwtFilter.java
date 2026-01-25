@@ -6,6 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +22,8 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final CustomUserDetailsService userDetailsService;
-
+    private static final Logger log =
+            LoggerFactory.getLogger(JwtFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -28,7 +31,6 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 🔥 CORS preflight
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
@@ -43,27 +45,39 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (!jwtProvider.validateToken(token)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try {
+            if (!jwtProvider.validateToken(token)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-        String username = jwtProvider.getUsernameFromToken(token);
+            String username = jwtProvider.getUsernameFromToken(token);
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // 🔥 MUHIM: context bo‘sh bo‘lsagina qo‘y
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-        authentication.setDetails(
-                new WebAuthenticationDetailsSource().buildDetails(request)
-        );
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            }
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception e) {
+            // 🔥 ASOSIY NUQTA SHU YERDA
+            log.error("JWT FILTER ERROR", e);
+        }
 
         filterChain.doFilter(request, response);
     }
