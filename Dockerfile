@@ -1,16 +1,26 @@
-# 1-bosqich: Build qilish (Maven yordamida)
-FROM maven:3.8.5-openjdk-17 AS build
+# 1-bosqich: Build qilish uchun GraalVM JDK ishlatamiz
+FROM container-registry.oracle.com/graalvm/jdk:17-ol9 AS build
 WORKDIR /app
-# Loyiha fayllarini ko'chiramiz
-COPY . .
-# .jar faylni yasaymiz (testlarni o'tkazib yuboramiz)
-RUN mvn clean package -DskipTests
 
-# 2-bosqich: Ishga tushirish (GraalVM yordamida)
+# Maven wrapper va pom.xml fayllarini nusxalash
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+# Kutubxonalarni yuklab olish (bu build vaqtini tejaydi)
+RUN chmod +x mvnw && ./mvnw dependency:go-offline
+
+# Loyiha kodini nusxalash va build qilish
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
+
+# 2-bosqich: Ishga tushirish (Faqat Runtime qismi)
 FROM container-registry.oracle.com/graalvm/jdk:17-ol9
 WORKDIR /app
-# Build bosqichidan tayyor .jar faylni ko'chirib olamiz
-COPY --from=build /app/target/track-menegment-0.0.1-SNAPSHOT.jar app.jar
 
+# Build bosqichidan tayyor bo'lgan .jar faylni olamiz
+COPY --from=build /app/target/*.jar app.jar
+
+# Railway yoki Render uchun port
 EXPOSE 8081
+
+# GraalVM-da Spring Boot-ni ishga tushirish
 ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]
