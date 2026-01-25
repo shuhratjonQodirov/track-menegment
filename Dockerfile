@@ -1,15 +1,16 @@
-# 1. Java 17 muhitini tanlaymiz (Oracle GraalVM yoki OpenJDK)
-FROM container-registry.oracle.com/graalvm/jdk:17-ol9
-
-# 2. Ishchi papkani yaratamiz
+# 1-bosqich: Build qilish (Maven yordamida)
+FROM maven:3.8.5-openjdk-17 AS build
 WORKDIR /app
+# Loyiha fayllarini ko'chiramiz
+COPY . .
+# .jar faylni yasaymiz (testlarni o'tkazib yuboramiz)
+RUN mvn clean package -DskipTests
 
-# 3. Target papkasidagi tayyor .jar faylni konteyner ichiga 'app.jar' nomi bilan ko'chiramiz
-# Rasmda ko'ringan aniq nom: track-menegment-0.0.1-SNAPSHOT.jar
-COPY target/track-menegment-0.0.1-SNAPSHOT.jar app.jar
+# 2-bosqich: Ishga tushirish (GraalVM yordamida)
+FROM container-registry.oracle.com/graalvm/jdk:17-ol9
+WORKDIR /app
+# Build bosqichidan tayyor .jar faylni ko'chirib olamiz
+COPY --from=build /app/target/track-menegment-0.0.1-SNAPSHOT.jar app.jar
 
-# 4. Railway yoki Render beradigan portda ishlashi uchun o'zgaruvchi
 EXPOSE 8081
-
-# 5. Loyihani ishga tushirish (Spring Boot xususiyatlarini optimallashtirgan holda)
-ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]-b"]
+ENTRYPOINT ["java", "-Xmx512m", "-jar", "app.jar"]
