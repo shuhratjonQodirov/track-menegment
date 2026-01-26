@@ -26,4 +26,10 @@ public class TruckExpenseController {
         ApiResponse response = truckExpenseService.delete(id);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{truckExpense}")
+    public HttpEntity<?> update(@PathVariable Long truckExpense) {
+        ApiResponse response = truckExpenseService.update(truckExpense);
+        return ResponseEntity.ok(response);
+    }
 }

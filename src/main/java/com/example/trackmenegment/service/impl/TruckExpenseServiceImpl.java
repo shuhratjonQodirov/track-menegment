@@ -45,5 +45,10 @@ public class TruckExpenseServiceImpl implements TruckExpenseService {
         return new ApiResponse("truck Expense successfully deleted ", true);
     }
 
+    @Override
+    public ApiResponse update(Long truckExpense) {
+        return null;
+    }
+
 
 }
