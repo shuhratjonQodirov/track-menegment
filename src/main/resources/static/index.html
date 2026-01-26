@@ -1061,34 +1061,43 @@
     }
 
     function showTab(tabName) {
-        // 1. Barcha tablarni yashirish (Hozir dashboard-tab ham yashiriladi)
-        const tabs = document.querySelectorAll('.tab-content');
-        tabs.forEach(tab => {
+        // 1. Avval barcha asosiy tab kontentlarini yashiramiz
+        document.querySelectorAll('.tab-content').forEach(tab => {
             tab.classList.add('hidden');
         });
 
-        // 2. Navigatsiya tugmalaridan aktiv rangni olib tashlash
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('bg-blue-600', 'text-white', 'bg-gray-100');
+        // 2. 🔥 MUHIM: Ochilib qolgan barcha "Detail" (tafsilotlar) bo'limlarini yopamiz
+        const detailSections = [
+            'userDetailsSection',
+            'tripDetailsSection',
+            'tripDetailsModal' // Agar modal ishlatayotgan bo'lsangiz
+        ];
+
+        detailSections.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.classList.add('hidden');
+                // Agar modal active klassi bo'lsa uni ham olib tashlaymiz
+                element.classList.remove('active');
+            }
         });
 
-        // 3. Tanlangan tabni ko'rsatish
-        const selectedTab = document.getElementById(`${tabName}-tab`);
-        if (selectedTab) {
-            selectedTab.classList.remove('hidden');
+        // 3. Tanlangan tabni ko'rsatamiz
+        const activeTab = document.getElementById(`${tabName}-tab`);
+        if (activeTab) {
+            activeTab.classList.remove('hidden');
         }
 
-        // 4. Tanlangan tugmani aktiv qilish
-        const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('bg-blue-600', 'text-white');
-        }
+        // 4. Tab tugmalarining stilini yangilaymiz (active holati)
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('hover:bg-gray-100');
 
-        // 5. Ma'lumotlarni yuklash (Faqat kerakli bo'lim yuklanadi)
-        if (tabName === 'dashboard') loadDashboard();
-        else if (tabName === 'users') loadAllUsers();
-        else if (tabName === 'trucks') loadTrucks();
-        else if (tabName === 'trips') loadTrips();
+            if (btn.getAttribute('data-tab') === tabName) {
+                btn.classList.add('bg-blue-600', 'text-white');
+                btn.classList.remove('hover:bg-gray-100');
+            }
+        });
     }
 
     async function loadDashboard() {
@@ -1986,6 +1995,7 @@
                 <div class="mt-4 pt-4 border-t flex justify-between items-center font-bold">
                      <span class="text-gray-400 text-[10px] uppercase italic tracking-widest">Jami xarajat:</span>
                      <span class="text-xl text-slate-800 tracking-tighter">$${trip.totalFuelCostUsd.toFixed(2)}</span>
+                     <span class="text-xl text-slate-800 tracking-tighter">$${trip.totalLiters.toFixed(2)}</span>
                 </div>
             </div>
 
@@ -2154,7 +2164,6 @@
             console.error('Print error:', error);
         }
     }
-
     //trip expense
     // 1. Modalni ochish (Ochilganda ham tozalanadi)
     function addTruckExpense(tripId, truckId) {
@@ -2218,8 +2227,6 @@
             showNotify("Xato",data.message || "Xatolik!");
         }
     };
-
-
 
     async function updateTripStatus(tripId, currentStatus) {
         const nextStatus = (currentStatus === 'COMPLETED') ? 'IN_PROGRESS' : 'COMPLETED';
