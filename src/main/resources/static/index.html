@@ -1518,155 +1518,179 @@
     }
 
     async function viewUser(userId) {
-        try {
-            const response = await fetch(`${API_BASE}/user/${userId}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
+    try {
+        const response = await fetch(`${API_BASE}/user/${userId}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
 
-            if (!response.ok) {
-                throw new Error(`HTTP xatosi: ${response.status}`);
-            }
+        if (!response.ok) {
+            throw new Error(`HTTP xatosi: ${response.status}`);
+        }
 
-            const result = await response.json();
+        const result = await response.json();
 
-            if (!result.success || !result.object) {
-                showNotify("Muoomo mavjud !",'Foydalanuvchi maʼlumotlari yuklanmadi!');
-                return;
-            }
+        if (!result.success || !result.object) {
+            showNotify("Muammo mavjud!", 'Foydalanuvchi maʼlumotlari yuklanmadi!');
+            return;
+        }
 
-            const user = result.object;
+        const user = result.object;
 
-            // Elementlarni null-safe yashiramiz
-            const usersHeader = document.getElementById('usersHeader');
-            const userTypeTabs = document.getElementById('userTypeTabs');
-            const usersList = document.getElementById('usersList');
+        // Asosiy ro'yxat elementlarini yashirish
+        const usersHeader = document.getElementById('usersHeader');
+        const userTypeTabs = document.getElementById('userTypeTabs');
+        const usersList = document.getElementById('usersList');
 
-            if (usersHeader) usersHeader.classList.add('hidden');
-            if (userTypeTabs) userTypeTabs.classList.add('hidden');
-            if (usersList) usersList.classList.add('hidden');
+        if (usersHeader) usersHeader.classList.add('hidden');
+        if (userTypeTabs) userTypeTabs.classList.add('hidden');
+        if (usersList) usersList.classList.add('hidden');
 
-            const detailsSection = document.getElementById('userDetailsSection');
-            if (!detailsSection) {
-                showNotify("Muommo mavjud !",'userDetailsSection elementi topilmadi!');
-                return;
-            }
-            detailsSection.classList.remove('hidden');
+        const detailsSection = document.getElementById('userDetailsSection');
+        if (!detailsSection) {
+            showNotify("Xatolik!", 'userDetailsSection topilmadi!');
+            return;
+        }
+        detailsSection.classList.remove('hidden');
 
-            // Role ga qarab sarlavha
-            let roleTitle = '';
-            switch (user.role) {
-                case 'DRIVER':      roleTitle = 'Haydovchi'; break;
-                case 'MANAGER':     roleTitle = 'Menejer'; break;
-                case 'ECONOMIST':   roleTitle = 'Iqtisodchi'; break;
-                case 'DIRECTOR':    roleTitle = 'Direktor'; break;
-                default:            roleTitle = user.role || 'Foydalanuvchi';
-            }
+        // Role ga qarab o'zbekcha nomlash
+        let roleTitle = '';
+        switch (user.role) {
+            case 'DRIVER':   roleTitle = 'Haydovchi'; break;
+            case 'MANAGER':  roleTitle = 'Menejer'; break;
+            case 'ECONOMIST': roleTitle = 'Iqtisodchi'; break;
+            case 'DIRECTOR':  roleTitle = 'Direktor'; break;
+            default:         roleTitle = 'Foydalanuvchi';
+        }
 
-            detailsSection.innerHTML = `
-            <div class="min-h-screen bg-gray-100 py-8 px-4">
-                <div class="max-w-6xl mx-auto"> <!-- Kenglikni 50% ga yaqin kamaytirdik -->
-                    <!-- Ortga tugmasi -->
-                    <button onclick="closeUserDetails()" class="mb-6 text-blue-600 hover:underline flex items-center gap-2 text-base font-medium">
-                        ← Ortga
+        // HTML tarkibini driver-management.html dizayniga moslash
+        detailsSection.innerHTML = `
+            <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px; font-family: 'Outfit', sans-serif;">
+                
+                <div style="margin-bottom: 30px; animation: slideDown 0.6s ease-out;">
+                    <button onclick="closeUserDetails()" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; color: #475569; cursor: pointer; font-weight: 500; transition: all 0.3s ease;">
+                        <span>←</span> Ortga
                     </button>
+                </div>
 
-                    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                        <!-- Yuqori qism (gradient) -->
-                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 md:p-8">
-                            <div class="flex justify-between items-start mb-6">
-                                <h2 class="text-2xl md:text-3xl font-bold text-blue-800">${roleTitle} Ma'lumotlari</h2>
-                                <button onclick="editUser(${user.id})" class="flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium text-sm md:text-base shadow-md">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
-                                    Tahrirlash
-                                </button>
-                            </div>
+                <div class="driver-info-card" style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+                        <h1 style="font-size: 28px; font-weight: 700; color: #1e293b;">${roleTitle} Ma'lumotlari</h1>
+                        <button onclick="editUser(${user.id})" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                            <span>✏️</span> Tahrirlash
+                        </button>
+                    </div>
 
-                            <!-- Asosiy 3 ta ustun -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">F.I.O</p>
-                                    <p class="text-xl md:text-1xl font-bold text-gray-800">${user.fullName || '-'}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Yoshi</p>
-                                    <p class="text-xl md:text-1xl font-bold text-gray-800">${user.age || '-'} yosh</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Manzil</p>
-                                    <p class="text-xl md:text-1xl font-bold text-gray-800">${user.address || '-'}</p>
-                                </div>
-                            </div>
-
-                            <!-- Sanalar -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Tug'ilgan sana</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.brithDate || user.birthDate || '-'}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Ishga kirgan sana</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.hireDate || '-'}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Ishdan bo‘shagan sana</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.fireDate ? user.fireDate : 'Hozircha yo‘q'}</p>
-                                </div>
-                            </div>
-
-                            <!-- Identifikatorlar -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">PNFL</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.pnfl || '-'}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Telefon</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.phoneNumber || '-'}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Passport raqami</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.passportNumber || '-'}</p>
-                                </div>
-                            </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">F.I.O</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.fullName || '-'}</span>
                         </div>
-
-                        <!-- Rangli kartalar (50% ga yaqin kichikroq) -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 md:p-8 bg-gray-50">
-                            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-6 text-white text-center shadow-xl">
-                                <p class="text-base font-medium opacity-90">Oyliklar</p>
-                                <p class="text-3xl md:text-4xl font-bold mt-4">$2400</p>
-                                <p class="text-xs md:text-sm mt-3 opacity-80">2 ta to‘lov</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-6 text-white text-center shadow-xl">
-                                <p class="text-base font-medium opacity-90">Avanslar</p>
-                                <p class="text-3xl md:text-4xl font-bold mt-4">$500</p>
-                                <p class="text-xs md:text-sm mt-3 opacity-80">1 ta to‘lov</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 text-white text-center shadow-xl">
-                                <p class="text-base font-medium opacity-90">Bonuslar</p>
-                                <p class="text-3xl md:text-4xl font-bold mt-4">$300</p>
-                                <p class="text-xs md:text-sm mt-3 opacity-80">1 ta to‘lov</p>
-                            </div>
-                            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl p-6 text-white text-center shadow-xl">
-                                <p class="text-base font-medium opacity-90">Sof daromad</p>
-                                <p class="text-3xl md:text-4xl font-bold mt-4">$1950</p>
-                                <p class="text-xs md:text-sm mt-3 opacity-80">Xarajatlar: $250</p>
-                            </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Yoshi</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.age || '-'} yosh</span>
                         </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Manzil</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.address || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Tug'ilgan sana</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.birthDate || user.brithDate || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Ishga kirgan sana</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.hireDate || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Ishdan bo'shagan sana</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.fireDate || "Hozircha yo'q"}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">PNFL</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.pnfl || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Telefon</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.phoneNumber || '-'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Passport raqami</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.passportNumber || '-'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Hozirgi Balans</h2>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6; font-family: 'JetBrains Mono', monospace;">$1,950</span>
+                            <span style="font-size: 24px; color: #64748b; font-weight: 600;">USD</span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Daromad</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$3,200</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Xarajat</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$1,250</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Avanslar</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$500</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #a855f7;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Bonuslar</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$300</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <button onclick="openModal('salaryModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>💰</span> Oylik Yozish
+                        </button>
+                        <button onclick="openModal('advanceModal')" style="padding: 16px; border-radius: 12px; border: none; background: #f97316; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>💳</span> Avans Berish
+                        </button>
+                        <button onclick="openModal('bonusModal')" style="padding: 16px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>🎁</span> Bonus Berish
+                        </button>
+                        <button onclick="openModal('reportModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>📊</span> Hisobot Yuklash
+                        </button>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                        <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Bajarilgan Resylar</h2>
+                        <div style="display: flex; gap: 10px; background: #f8fafc; padding: 6px; border-radius: 12px;">
+                            <button style="padding: 10px 20px; border: none; background: #3b82f6; color: white; font-weight: 600; border-radius: 8px;">Barchasi</button>
+                            <button style="padding: 10px 20px; border: none; background: transparent; color: #64748b; font-weight: 600; border-radius: 8px;">Bajarilgan</button>
+                        </div>
+                    </div>
+                    
+                    <div id="userTripsList" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="text-align: center; padding: 40px; color: #64748b;">Resylar ma'lumotlari yuklanmoqda...</div>
                     </div>
                 </div>
             </div>
         `;
 
-            detailsSection.scrollIntoView({ behavior: 'smooth' });
+        // Detallar bo'limiga fokus qilish
+        detailsSection.scrollIntoView({ behavior: 'smooth' });
 
-        } catch (error) {
-            console.error('View user error:', error);
-            showNotify("Maʼlumot yuklashda xatolik!", "Console ni tekshiring (F12).");
-        }
+        // Foydalanuvchining resylarini alohida yuklash (ixtiyoriy, agar API bo'lsa)
+        // loadUserTrips(userId);
+
+    } catch (error) {
+        console.error('View user error:', error);
+        showNotify("Xatolik!", "Ma'lumotlarni yuklashda xatolik yuz berdi.");
     }
+}
 
     function closeUserDetails() {
         const detailsSection = document.getElementById('userDetailsSection');
