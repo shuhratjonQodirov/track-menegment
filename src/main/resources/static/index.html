@@ -1566,8 +1566,8 @@
         detailsSection.innerHTML = `
             <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px; font-family: 'Outfit', sans-serif;">
                 
-                <div style="margin-bottom: 30px; animation: slideDown 0.6s ease-out;">
-                    <button onclick="closeUserDetails()" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; color: #475569; cursor: pointer; font-weight: 500; transition: all 0.3s ease;">
+                <div style="margin-bottom: 30px;">
+                    <button onclick="closeUserDetails()" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; color: #475569; cursor: pointer; font-weight: 500;">
                         <span>←</span> Ortga
                     </button>
                 </div>
@@ -1581,100 +1581,60 @@
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">F.I.O</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.fullName || '-'}</span>
                         </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Yoshi</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.age || '-'} yosh</span>
                         </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Manzil</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.address || '-'}</span>
                         </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Tug'ilgan sana</span>
-                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.birthDate || user.brithDate || '-'}</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.birthDate || '-'}</span>
                         </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Ishga kirgan sana</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.hireDate || '-'}</span>
                         </div>
-                        <div class="detail-item">
-                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Ishdan bo'shagan sana</span>
-                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.fireDate || "Hozircha yo'q"}</span>
-                        </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">PNFL</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.pnfl || '-'}</span>
                         </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Telefon</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.phoneNumber || '-'}</span>
                         </div>
-                        <div class="detail-item">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Passport raqami</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.passportNumber || '-'}</span>
                         </div>
                     </div>
                 </div>
 
-                <div style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <div style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Hozirgi Balans</h2>
+                        <h2 style="font-size: 24px; font-weight: 700;">Hozirgi Balans</h2>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6; font-family: 'JetBrains Mono', monospace;">$1,950</span>
-                            <span style="font-size: 24px; color: #64748b; font-weight: 600;">USD</span>
+                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6;">$1,950</span>
+                            <span style="font-size: 24px; color: #64748b;">USD</span>
                         </div>
                     </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Daromad</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$3,200</div>
-                        </div>
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Xarajat</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$1,250</div>
-                        </div>
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Avanslar</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$500</div>
-                        </div>
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #a855f7;">
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Bonuslar</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$300</div>
-                        </div>
-                    </div>
-
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <button onclick="openModal('salaryModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <span>💰</span> Oylik Yozish
-                        </button>
-                        <button onclick="openModal('advanceModal')" style="padding: 16px; border-radius: 12px; border: none; background: #f97316; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <span>💳</span> Avans Berish
-                        </button>
-                        <button onclick="openModal('bonusModal')" style="padding: 16px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <span>🎁</span> Bonus Berish
-                        </button>
-                        <button onclick="openModal('reportModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                            <span>📊</span> Hisobot Yuklash
-                        </button>
+                        <button onclick="openModal('salaryModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer;">💰 Oylik Yozish</button>
+                        <button onclick="openModal('advanceModal')" style="padding: 16px; border-radius: 12px; border: none; background: #f97316; color: white; font-weight: 600; cursor: pointer;">💳 Avans Berish</button>
+                        <button onclick="openModal('bonusModal')" style="padding: 16px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 600; cursor: pointer;">🎁 Bonus Berish</button>
+                        <button onclick="openModal('reportModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer;">📊 Hisobot Yuklash</button>
                     </div>
                 </div>
-
-                <div style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Bajarilgan Resylar</h2>
-                        <div style="display: flex; gap: 10px; background: #f8fafc; padding: 6px; border-radius: 12px;">
-                            <button style="padding: 10px 20px; border: none; background: #3b82f6; color: white; font-weight: 600; border-radius: 8px;">Barchasi</button>
-                            <button style="padding: 10px 20px; border: none; background: transparent; color: #64748b; font-weight: 600; border-radius: 8px;">Bajarilgan</button>
-                        </div>
-                    </div>
-                    
-                    <div id="userTripsList" style="display: flex; flex-direction: column; gap: 15px;">
-                        <div style="text-align: center; padding: 40px; color: #64748b;">Resylar ma'lumotlari yuklanmoqda...</div>
+                <div style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0;">
+                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 25px;">Bajarilgan Resylar</h2>
+                    <div id="userTripsList">
+                        <div style="text-align: center; padding: 20px; color: #64748b;">Yuklanmoqda...</div>
                     </div>
                 </div>
             </div>
