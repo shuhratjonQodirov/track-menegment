@@ -39,4 +39,31 @@ public class TruckExpenseValidator {
             throw new ValidationException("Expense date noto'g'ri");
         }
     }
+
+    public void validateForUpdate(TruckExpenseReq truckExpenseReq) {
+
+        if (truckExpenseReq.getTruckId() == null || truckExpenseReq.getTruckId() == 0) {
+            throw new ValidationException("Truck id cannot be null or 0");
+        }
+        if (truckExpenseReq.getTruckExpenseType().isBlank()) {
+            throw new ValidationException("Expense type cannot be empty");
+        }
+        if (truckExpenseReq.getLocalCurrency().isBlank()) {
+            throw new ValidationException("Local currency type cannot be empty");
+        }
+        if (truckExpenseReq.getDescription().isBlank()) {
+            throw new ValidationException("Description type cannot be empty");
+        }
+        if (truckExpenseReq.getAmountLocal() == null || truckExpenseReq.getAmountLocal().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException("Amount usd 0 dan katta bo'lishi kerak");
+        }
+        if (truckExpenseReq.getAmountUsd() == null || truckExpenseReq.getAmountUsd().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException("Amount usd 0 dan katta bo'lishi kerak");
+        }
+        if (truckExpenseReq.getExpenseDate() == null || truckExpenseReq.getExpenseDate().isAfter(LocalDate.now())) {
+            throw new ValidationException("Expense Date cannot be future");
+        }
+
+
+    }
 }

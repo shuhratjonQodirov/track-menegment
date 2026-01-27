@@ -735,8 +735,72 @@
         </div>
     </div>
 </div>
+
+<div id="salaryModal" class="fixed inset-0 z-[150] hidden overflow-y-auto backdrop-blur-sm bg-black/40 transition-all duration-300">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white w-full max-w-md shadow-2xl rounded-[32px] border border-gray-100 p-8">
+
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 tracking-tight">Oylik / To'lov yozish</h3>
+                <button onclick="closeSalaryModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="salaryForm" class="space-y-6">
+                <input type="hidden" id="balanceUserId">
+                <input type="hidden" id="balanceTripId">
+
+                <div>
+                    <label class="block text-[13px] font-semibold text-gray-500 ml-1 mb-1.5">To'lov turi</label>
+                    <select id="paymentType" class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl p-3.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all appearance-none cursor-pointer" required>
+                        <option value="SALARY">💰 Oylik (Salary)</option>
+                        <option value="BONUS">🎁 Bonus</option>
+                        <option value="PENALTY">⚠️ Jarima (Penalty)</option>
+                        <option value="ADVANCE">💸 Avans (Advance)</option>
+                        <option value="PERSONAL">👤 Shaxsiy (Personal)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[13px] font-semibold text-gray-500 ml-1 mb-1.5">Summa (USD)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+                            <input type="number" id="balanceAmountUsd" step="0.01" placeholder="0.00" class="w-full bg-green-50/50 border-none ring-1 ring-green-100 rounded-2xl p-3.5 pl-7 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all font-bold text-green-600" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[13px] font-semibold text-gray-500 ml-1 mb-1.5">Sana</label>
+                        <input type="date" id="operationDate" class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl p-3.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all cursor-pointer" required>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 p-1">
+                    <input type="checkbox" id="isPaid" class="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
+                    <label for="isPaid" class="text-sm font-medium text-gray-700">To'lov amalga oshirilgan (Is Paid)</label>
+                </div>
+
+                <div>
+                    <label class="block text-[13px] font-semibold text-gray-500 ml-1 mb-1.5">Tavsif</label>
+                    <textarea id="balanceDescription" class="w-full bg-gray-50 border-none ring-1 ring-gray-200 rounded-2xl p-3.5 text-sm focus:ring-2 focus:ring-green-500 outline-none transition-all resize-none" rows="2" placeholder="Izoh yozing..." required></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-2">
+                    <button type="button" onclick="closeSalaryModal()" class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold hover:bg-gray-200 transition-all active:scale-95">
+                        Bekor qilish
+                    </button>
+                    <button type="submit" class="flex-1 py-4 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 shadow-xl shadow-green-100 transition-all active:scale-95">
+                        Saqlash
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script  >
     const API_BASE = 'https://track-menegment-2.onrender.com/api/v1';
+    // const API_BASE = 'http://localhost:8081/api/v1';
     let authToken = null;
     let currentUser = null;
     let currentUserFilter = 'DRIVER';
@@ -1356,6 +1420,112 @@
         document.getElementById('addTruckModal').classList.add('active');
     }
 
+
+    let isEditMode = false;
+    let currentBalanceId = null;
+
+    // Modalni ochish funksiyasi
+    function openSalaryModal(userId, tripId = null, existingData = null) {
+        const modal = document.getElementById('salaryModal');
+        const form = document.getElementById('salaryForm');
+
+        // Har safar ochilganda formani va holatni tozalash
+        form.reset();
+        isEditMode = false;
+        currentBalanceId = null;
+
+        // Yashirin maydonlarga qiymat berish
+        document.getElementById('balanceUserId').value = userId;
+        document.getElementById('balanceTripId').value = tripId || "";
+
+        // Sanani bugungi kunga sozlash
+        document.getElementById('operationDate').valueAsDate = new Date();
+
+        if (existingData) {
+            // TAHRIRLASH REJIMI (Agar ma'lumot uzatilsa)
+            isEditMode = true;
+            currentBalanceId = existingData.id;
+            document.getElementById('balanceAmountUsd').value = existingData.amountUsd;
+            document.getElementById('paymentType').value = existingData.paymentType;
+            document.getElementById('balanceDescription').value = existingData.description;
+            document.getElementById('operationDate').value = existingData.operationDate;
+            document.getElementById('isPaid').checked = existingData.isPaid;
+            document.querySelector('#salaryModal h3').innerText = "Balansni tahrirlash";
+        } else {
+            // YANGI QO'SHISH REJIMI
+            document.querySelector('#salaryModal h3').innerText = "Oylik / To'lov yozish";
+        }
+
+        // Modalni ko'rsatish
+        modal.classList.remove('hidden');
+    }
+
+    // Formani yuborish (Submit)
+    document.getElementById('salaryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const data = {
+            userId: document.getElementById('balanceUserId').value,
+            tripId: document.getElementById('balanceTripId').value || null,
+            amountUsd: document.getElementById('balanceAmountUsd').value,
+            paymentType: document.getElementById('paymentType').value,
+            description: document.getElementById('balanceDescription').value,
+            operationDate: document.getElementById('operationDate').value,
+            isPaid: document.getElementById('isPaid').checked
+        };
+
+        // Siz so'ragan URL manzillar
+        const url = isEditMode
+            ? `${API_BASE}/user-balance/edit-balance?id=${currentBalanceId}`
+            : `${API_BASE}/user-balance/add-balance`;
+
+        const method = isEditMode ? 'PUT' : 'POST';
+
+        try {
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Siz so'ragan bildirishnoma funksiyasi
+                showNotify("Muvaffaqiyatli !", isEditMode ? "Ma'lumot yangilandi!" : "To'lov muvaffaqiyatli qo'shildi!");
+
+                // Tozalash va yopish
+                closeSalaryModal();
+
+                // Agar jadval bo'lsa yangilash
+                if (typeof loadBalances === "function") loadBalances();
+            } else {
+                showNotify("Xato!", result.message || "Xatolik yuz berdi", "error");
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showNotify("Xato!", "Server bilan aloqa uzildi", "error");
+        }
+    });
+
+    function closeSalaryModal() {
+        const modal = document.getElementById('salaryModal');
+        modal.classList.add('hidden');
+
+        // Formani tozalash
+        document.getElementById('salaryForm').reset();
+
+        // Yashirin ID larni ham qo'lda tozalash (reset bularni doim ham tozalamaydi)
+        document.getElementById('balanceUserId').value = "";
+        document.getElementById('balanceTripId').value = "";
+        currentBalanceId = null;
+        isEditMode = false;
+    }
+
+
     function closeAddTruckModal() {
         document.getElementById('addTruckModal').classList.remove('active');
         document.getElementById('addTruckForm').reset();
@@ -1612,9 +1782,10 @@
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <button onclick="toggleFinanceView(${user.id})" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer;">💰 Oyliklarni ko'rish</button>
-                        <button onclick="openModal('advanceModal')" style="padding: 16px; border-radius: 12px; border: none; background: #f97316; color: white; font-weight: 600; cursor: pointer;">💳 Avans Berish</button>
-                        <button onclick="openModal('bonusModal')" style="padding: 16px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 600; cursor: pointer;">🎁 Bonus Berish</button>
-                        <button onclick="showTripsView(${user.id})" style="padding: 16px; border-radius: 12px; border: 1px solid #3b82f6; background: white; color: #3b82f6; font-weight: 600; cursor: pointer;">🚚 Reyslarni ko'rish</button>
+
+                        <button onclick="openSalaryModal(${user.id})" style="padding: 16px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 600; cursor: pointer;"> 🎁 Oylik yozish </button>
+
+                        <button onclick="showTripsView(${user.id})" style="padding: 16px; border-radius: 12px; border: none; background: #1a59b8; color: white; font-weight: 600; cursor: pointer;">🚚 Reyslarni ko'rish</button>
                     </div>
                 </div>
 
@@ -1673,39 +1844,68 @@ async function showTripsView(userId) {
 }
 
 // OYLIK VA MOLIYAVIY MA'LUMOTLARNI KO'RSATISH
-async function toggleFinanceView(userId) {
-    document.getElementById('reportDownloadContainer').classList.remove('hidden');
-    const container = document.getElementById('dynamicListContainer');
-    const title = document.getElementById('dynamicTitle');
-    title.innerText = "Oylik, Bonus va Avanslar";
-    container.innerHTML = "Yuklanmoqda...";
+    async function toggleFinanceView(userId) {
+        document.getElementById('reportDownloadContainer').classList.remove('hidden');
+        const container = document.getElementById('dynamicListContainer');
+        const title = document.getElementById('dynamicTitle');
+        title.innerText = "Oylik, Bonus va Avanslar";
+        container.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">Yuklanmoqda...</div>`;
 
-    try {
-        const response = await fetch(`${API_BASE}/user/finance/${userId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const result = await response.json();
+        try {
+            const response = await fetch(`${API_BASE}/user-balance/view-list/${userId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const result = await response.json();
 
-        if (!result.success || !result.object || result.object.length === 0) {
-            container.innerHTML = "Moliyaviy ma'lumotlar topilmadi.";
-            return;
-        }
+            if (!result.success || !result.object || result.object.length === 0) {
+                container.innerHTML = `<div style="padding: 20px; text-align: center; color: #94a3b8;">Ma'lumotlar topilmadi.</div>`;
+                return;
+            }
 
-        container.innerHTML = result.object.map(item => `
-            <div style="background: #f8fafc; border-radius: 12px; padding: 20px; border-left: 5px solid ${item.type === 'SALARY' ? '#3b82f6' : item.type === 'BONUS' ? '#10b981' : '#f97316'}; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-weight: 700; color: #1e293b;">${item.type === 'SALARY' ? 'Oylik' : item.type === 'BONUS' ? 'Bonus' : 'Avans'}</div>
-                    <div style="font-size: 13px; color: #64748b;">Sana: ${item.date}</div>
-                    <div style="font-size: 14px; color: #475569; margin-top: 5px;">Izoh: ${item.comment || 'Izoh yo\'q'}</div>
+            container.innerHTML = result.object.map(item => {
+                // Turiga qarab rang va matnni aniqlash
+                const config = {
+                    'SALARY': { label: 'Oylik', color: '#3b82f6' },
+                    'BONUS': { label: 'Bonus', color: '#10b981' },
+                    'ADVANCE': { label: 'Avans', color: '#f97316' },
+                    'PERSONAL': { label: 'Shaxsiy', color: '#8b5cf6' },
+                    'PENALTY': { label: 'Jarima', color: '#ef4444' }
+                }[item.paymentType] || { label: item.paymentType, color: '#64748b' };
+
+                return `
+            <div style="background: white; border-radius: 12px; padding: 16px; border-left: 6px solid ${config.color}; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="border-left: 5px solid ${config.color}; padding-left: 15px;">
+                    <div style="font-weight: 700; color: #1e293b; font-size: 16px;">${config.label}</div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 2px;">
+                        📅 ${item.operationDate || 'Sana ko\'rsatilmagan'}
+                    </div>
+                    <div style="font-size: 14px; color: #475569; margin-top: 6px; font-style: italic;">
+                        💬 ${item.description || 'Izoh yo\'q'}
+                    </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 18px; font-weight: 800; color: #1e293b;">$${item.amount}</div>
-                    <span style="font-size: 11px; color: #64748b;">USD</span>
+
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="text-align: right;">
+                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">
+                            $${item.amountUsd.toLocaleString()}
+                        </div>
+                        <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">USD</span>
+                    </div>
+
+                    <button onclick='openSalaryModal(${userId}, ${item.tripId || 'null'}, ${JSON.stringify(item)})'
+                            style="background: #f1f5f9; border: none; padding: 10px; border-radius: 10px; cursor: pointer; transition: 0.2s;"
+                            onmouseover="this.style.background='#e2e8f0'"
+                            onmouseout="this.style.background='#f1f5f9'">
+                        ✏️
+                    </button>
                 </div>
             </div>
-        `).join('');
-    } catch (e) { container.innerHTML = "Xatolik yuz berdi!"; }
-}
+            `;
+            }).join('');
+        } catch (e) {
+            container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Xatolik yuz berdi!</div>`;
+        }
+    }
 
 // HISOBOT YUKLASH FUNKSIYASI (AXLOQIY)
 async function downloadFinanceReport(userId) {
@@ -2161,61 +2361,90 @@ async function downloadFinanceReport(userId) {
             if (!data.success) return;
 
             const trip = data.object;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=TripID-${trip.id}`;
-
-            // 1. Vaqtinchalik konteyner yaratish
             const printContainer = document.createElement('div');
             printContainer.id = 'print-section';
 
-            // 2. innerHTML orqali chek strukturasini berish
             printContainer.innerHTML = `
-            <div style="width: 80mm; font-family: 'Courier New', monospace; padding: 10px; color: black; background: white;">
-                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                    <h2 style="margin: 0; font-size: 18px; text-transform: uppercase;">Logistics Check</h2>
-                    <p style="font-size: 10px; margin: 5px 0;">Sana: ${new Date().toLocaleString()}</p>
-                </div>
-
-                <div style="font-size: 12px; line-height: 1.6;">
-                    <p style="margin: 0; display: flex; justify-content: space-between;"><b>Reys:</b> <span>${trip.routeFrom} - ${trip.routeTo}</span></p>
-                    <p style="margin: 0; display: flex; justify-content: space-between;"><b>Mashina:</b> <span>${trip.truckNumber}</span></p>
-                    <p style="margin: 0; display: flex; justify-content: space-between;"><b>Haydovchi:</b> <span>${trip.driverFullName}</span></p>
-                </div>
-
-                <div style="border-top: 1px solid #000; margin-top: 10px; padding-top: 10px; font-size: 11px;">
-                    <div style="display: flex; justify-content: space-between;"><span>Daromad:</span> <b>$${trip.totalIncomeUsd.toFixed(2)}</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Jami xarajat:</span> <b>-$${(trip.totalFuelCostUsd + trip.totalTripExpensesUsd + trip.truckExpensesTotalUsd + trip.driverIncomeUsd).toFixed(2)}</b></div>
-                </div>
-
-                <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; display: flex; justify-content: space-between; font-size: 15px; font-weight: bold;">
-                    <span>SOF FOYDA:</span>
-                    <span>$${trip.profitUsd.toFixed(2)}</span>
-                </div>
-
-                <div style="margin-top: 20px; text-align: center;">
-                    <img src="${qrUrl}" style="width: 80px; height: 80px; display: inline-block;">
-                    <p style="font-size: 9px; margin-top: 5px;">ID: #TRP-${trip.id}</p>
-                </div>
+        <div class="ticket">
+            <div class="header">
+                <h2>LOGISTICS CHECK</h2>
+                <p>Sana: ${new Date().toLocaleString()}</p>
             </div>
-        `;
 
-            // 3. CSS orqali sahifani printga tayyorlash
+            <div class="info">
+                <div><b>Reys:</b> ${trip.routeFrom} - ${trip.routeTo}</div>
+                <div><b>Mashina:</b> ${trip.truckNumber}</div>
+                <div><b>Haydovchi:</b> ${trip.driverFullName}</div>
+            </div>
+
+            <div class="line"></div>
+
+            <div class="stats">
+                <div class="row"><span>Yoqilg'i (${trip.totalLiters || 0} L):</span> <b>$${(trip.totalFuelCostUsd || 0).toFixed(2)}</b></div>
+                <div class="row"><span>Safar xarajatlari:</span> <b>$${(trip.totalTripExpensesUsd || 0).toFixed(2)}</b></div>
+                <div class="row"><span>Mashina xarajatlari:</span> <b>$${(trip.truckExpensesTotalUsd || 0).toFixed(2)}</b></div>
+            </div>
+
+            <div class="driver-box">
+                <div class="row"><span>Haydovchi oyligi:</span> <b>$${(trip.driverIncomeUsd || 0).toFixed(2)}</b></div>
+                <div class="row red"><span>Shaxsiy xarajat:</span> <b>-$${(trip.personalExpenseDriver || 0).toFixed(2)}</b></div>
+                <div class="row bold"><span>SOF OYLIK:</span> <span>$${((trip.driverIncomeUsd || 0) - (trip.personalExpenseDriver || 0)).toFixed(2)}</span></div>
+            </div>
+
+            <div class="total-box">
+                <div class="row bold big"><span>SOF FOYDA:</span> <span>$${(trip.profitUsd || 0).toFixed(2)}</span></div>
+            </div>
+
+            <div class="footer">
+                <p class="stamp">TASDIQLANDI</p>
+                <p>ID: #TRP-${trip.id}</p>
+                <p>Xizmatingiz uchun rahmat!</p>
+            </div>
+        </div>`;
+
             const style = document.createElement('style');
             style.innerHTML = `
             @media print {
+                /* Sahifa o'lchamini auto qilib, ortiqcha joyni kesib tashlaymiz */
+                @page {
+                    size: 80mm auto;
+                    margin: 0;
+                }
+                html, body {
+                    height: auto;
+                    overflow: hidden; /* Keyingi sahifalarni yaratishni cheklaydi */
+                }
                 body * { visibility: hidden; }
                 #print-section, #print-section * { visibility: visible; }
-                #print-section { position: absolute; left: 0; top: 0; width: 80mm; }
+                #print-section {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 72mm;
+                    margin: 0;
+                    padding: 2mm;
+                    page-break-after: avoid;
+                    page-break-inside: avoid;
+                }
             }
+            .ticket { font-family: 'Courier New', monospace; color: black; font-size: 11px; line-height: 1.2; }
+            .header { text-align: center; margin-bottom: 5px; }
+            .header h2 { margin: 0; font-size: 15px; border-bottom: 2px solid #000; }
+            .line { border-top: 1px dashed #000; margin: 4px 0; }
+            .row { display: flex; justify-content: space-between; margin: 2px 0; }
+            .bold { font-weight: bold; border-top: 1px solid #000; padding-top: 2px; }
+            .big { font-size: 14px; border-top: 2px solid #000; margin-top: 4px; }
+            .red { color: #d00; }
+            .driver-box { background: #f2f2f2; padding: 4px; margin: 4px 0; border: 1px solid #ddd; }
+            .footer { text-align: center; margin-top: 10px; border-top: 1px solid #000; padding-top: 5px; }
+            .stamp { font-weight: bold; border: 1px solid black; padding: 3px; display: inline-block; margin-bottom: 5px; }
         `;
 
-            // Sahifaga qo'shish
             document.body.appendChild(style);
             document.body.appendChild(printContainer);
 
-            // 4. Chop etish
             window.print();
 
-            // 5. Tozalash (print oynasi yopilgandan keyin)
             document.body.removeChild(printContainer);
             document.body.removeChild(style);
 

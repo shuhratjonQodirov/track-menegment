@@ -1,6 +1,8 @@
 package com.example.trackmenegment.service.impl;
 
 import com.example.trackmenegment.dto.req.TruckExpenseReq;
+import com.example.trackmenegment.enums.Currency;
+import com.example.trackmenegment.enums.TruckExpenseType;
 import com.example.trackmenegment.error.ByIdException;
 import com.example.trackmenegment.mapper.TruckExpenseMapper;
 import com.example.trackmenegment.model.Trip;
@@ -46,8 +48,29 @@ public class TruckExpenseServiceImpl implements TruckExpenseService {
     }
 
     @Override
-    public ApiResponse update(Long truckExpense) {
-        return null;
+    public ApiResponse update(Long truckExpense, TruckExpenseReq dto) {
+
+        truckExpenseValidator.validateForUpdate(dto);
+
+        TruckExpense expense = truckExpenseRepository.findByIdAndDeletedFalse(truckExpense).orElseThrow(() -> new ByIdException("Truck Expense not found"));
+
+        Truck truck = truckRepository.findByIdAndDeletedFalse(dto.getTruckId()).orElseThrow(() -> new ByIdException("Truck not found"));
+        expense.setTruck(truck);
+
+        if (dto.getTripId() != null) {
+            Trip trip = tripRepository.findByIdAndDeletedFalse(dto.getTripId()).orElseThrow(() -> new ByIdException("Trip not found"));
+            expense.setTrip(trip);
+        }
+        expense.setTruckExpenseType(TruckExpenseType.valueOf(dto.getTruckExpenseType()));
+        expense.setAmountUsd(dto.getAmountUsd());
+        expense.setAmountLocal(dto.getAmountLocal());
+        expense.setLocalCurrency(Currency.valueOf(dto.getLocalCurrency()));
+        expense.setDescription(dto.getDescription());
+        expense.setExpenseDate(dto.getExpenseDate());
+
+        truckExpenseRepository.save(expense);
+
+        return new ApiResponse("Muvaffaqiyatli yangilandi", true);
     }
 
 

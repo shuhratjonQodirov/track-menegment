@@ -28,8 +28,8 @@ public class TruckExpenseController {
     }
 
     @PutMapping("/{truckExpense}")
-    public HttpEntity<?> update(@PathVariable Long truckExpense) {
-        ApiResponse response = truckExpenseService.update(truckExpense);
+    public HttpEntity<?> update(@PathVariable Long truckExpense,@RequestBody TruckExpenseReq truckExpenseReq) {
+        ApiResponse response = truckExpenseService.update(truckExpense,truckExpenseReq);
         return ResponseEntity.ok(response);
     }
 }

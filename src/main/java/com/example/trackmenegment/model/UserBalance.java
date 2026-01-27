@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @EntityListeners(AuditingEntityListener.class)
 public class UserBalance extends AbsEntity {
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
 
@@ -29,7 +29,7 @@ public class UserBalance extends AbsEntity {
 
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Trip trip;
 
     private LocalDate operationDate;
