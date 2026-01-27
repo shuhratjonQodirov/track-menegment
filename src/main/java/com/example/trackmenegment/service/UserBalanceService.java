@@ -9,7 +9,7 @@ import com.example.trackmenegment.utils.ApiResponse;
 import java.math.BigDecimal;
 
 public interface UserBalanceService {
-    UserBalance createDriverBalance(User user, Trip trip, BigDecimal amountUsd, Boolean isPaid);
+    void createDriverBalance(User user, Trip trip, BigDecimal amountUsd, Boolean isPaid);
 
     ApiResponse create(UserBalanceReqDto dto);
 

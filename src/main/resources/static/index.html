@@ -799,8 +799,8 @@
     </div>
 </div>
 <script  >
-    const API_BASE = 'https://track-menegment-2.onrender.com/api/v1';
-    // const API_BASE = 'http://localhost:8081/api/v1';
+    // const API_BASE = 'https://track-menegment-2.onrender.com/api/v1';
+    const API_BASE = 'http://localhost:8081/api/v1';
     let authToken = null;
     let currentUser = null;
     let currentUserFilter = 'DRIVER';
@@ -2295,7 +2295,7 @@ async function downloadFinanceReport(userId) {
             <div class="bg-white border border-gray-100 rounded-[28px] p-6 flex flex-col h-[400px] shadow-sm">
                 <div class="flex justify-between items-center mb-4 pb-3 border-b">
                     <h5 class="font-bold text-slate-800 italic text-[15px]">👤 Haydovchi balansi</h5>
-                    <button onclick="addDriverBalance(${trip.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-xl text-[11px] font-bold transition-all ${hideIfLocked}">+ QO'SHISH</button>
+                    <button onclick="openSalaryModal(${trip.driverId},${trip.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-xl text-[11px] font-bold transition-all ${hideIfLocked}">+ QO'SHISH</button>
                 </div>
                 <div class="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                     ${trip.userBalanceResponseList && trip.userBalanceResponseList.length > 0 ? trip.userBalanceResponseList.map(bal => `

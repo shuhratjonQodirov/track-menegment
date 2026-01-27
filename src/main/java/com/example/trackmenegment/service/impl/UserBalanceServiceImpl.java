@@ -31,7 +31,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     private final TripRepository tripRepository;
 
     @Override
-    public UserBalance createDriverBalance(User user, Trip trip, BigDecimal amountUsd, Boolean isPaid) {
+    public void createDriverBalance(User user, Trip trip, BigDecimal amountUsd, Boolean isPaid) {
         UserBalance balance = UserBalance.builder()
                 .user(user)
                 .trip(trip)
@@ -41,7 +41,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
                 .isPaid(isPaid)
                 .operationDate(LocalDate.now())
                 .build();
-        return userBalanceRepository.save(balance);
+         userBalanceRepository.save(balance);
     }
 
     @Override

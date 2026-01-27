@@ -1,7 +1,6 @@
 package com.example.trackmenegment.validator;
 
 import com.example.trackmenegment.dto.req.TruckExpenseReq;
-import com.example.trackmenegment.error.ByIdException;
 import com.example.trackmenegment.error.ValidationException;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.stereotype.Component;
