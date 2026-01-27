@@ -1518,362 +1518,155 @@
     }
 
     async function viewUser(userId) {
-    try {
-        const response = await fetch(`${API_BASE}/user/${userId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+        try {
+            const response = await fetch(`${API_BASE}/user/${userId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
 
-        if (!response.ok) {
-            throw new Error(`HTTP xatosi: ${response.status}`);
-        }
+            if (!response.ok) {
+                throw new Error(`HTTP xatosi: ${response.status}`);
+            }
 
-        const result = await response.json();
+            const result = await response.json();
 
-        if (!result.success || !result.object) {
-            showNotify("Muommo mavjud !", 'Foydalanuvchi maʼlumotlari yuklanmadi!');
-            return;
-        }
+            if (!result.success || !result.object) {
+                showNotify("Muoomo mavjud !",'Foydalanuvchi maʼlumotlari yuklanmadi!');
+                return;
+            }
 
-        const user = result.object;
+            const user = result.object;
 
-        // Elementlarni null-safe yashiramiz
-        const usersHeader = document.getElementById('usersHeader');
-        const userTypeTabs = document.getElementById('userTypeTabs');
-        const usersList = document.getElementById('usersList');
+            // Elementlarni null-safe yashiramiz
+            const usersHeader = document.getElementById('usersHeader');
+            const userTypeTabs = document.getElementById('userTypeTabs');
+            const usersList = document.getElementById('usersList');
 
-        if (usersHeader) usersHeader.classList.add('hidden');
-        if (userTypeTabs) userTypeTabs.classList.add('hidden');
-        if (usersList) usersList.classList.add('hidden');
+            if (usersHeader) usersHeader.classList.add('hidden');
+            if (userTypeTabs) userTypeTabs.classList.add('hidden');
+            if (usersList) usersList.classList.add('hidden');
 
-        const detailsSection = document.getElementById('userDetailsSection');
-        if (!detailsSection) {
-            showNotify("Muommo mavjud !", 'userDetailsSection elementi topilmadi!');
-            return;
-        }
-        detailsSection.classList.remove('hidden');
+            const detailsSection = document.getElementById('userDetailsSection');
+            if (!detailsSection) {
+                showNotify("Muommo mavjud !",'userDetailsSection elementi topilmadi!');
+                return;
+            }
+            detailsSection.classList.remove('hidden');
 
-        // Role ga qarab sarlavha
-        let roleTitle = '';
-        switch (user.role) {
-            case 'DRIVER':      roleTitle = 'Haydovchi'; break;
-            case 'MANAGER':     roleTitle = 'Menejer'; break;
-            case 'ECONOMIST':   roleTitle = 'Iqtisodchi'; break;
-            case 'DIRECTOR':    roleTitle = 'Direktor'; break;
-            default:            roleTitle = user.role || 'Foydalanuvchi';
-        }
+            // Role ga qarab sarlavha
+            let roleTitle = '';
+            switch (user.role) {
+                case 'DRIVER':      roleTitle = 'Haydovchi'; break;
+                case 'MANAGER':     roleTitle = 'Menejer'; break;
+                case 'ECONOMIST':   roleTitle = 'Iqtisodchi'; break;
+                case 'DIRECTOR':    roleTitle = 'Direktor'; break;
+                default:            roleTitle = user.role || 'Foydalanuvchi';
+            }
 
-        detailsSection.innerHTML = `
-            <div class="min-h-screen bg-gray-50 py-8 px-4">
-                <div class="max-w-6xl mx-auto">
+            detailsSection.innerHTML = `
+            <div class="min-h-screen bg-gray-100 py-8 px-4">
+                <div class="max-w-6xl mx-auto"> <!-- Kenglikni 50% ga yaqin kamaytirdik -->
                     <!-- Ortga tugmasi -->
                     <button onclick="closeUserDetails()" class="mb-6 text-blue-600 hover:underline flex items-center gap-2 text-base font-medium">
                         ← Ortga
                     </button>
 
-                    <div class="bg-white rounded-3xl shadow-lg overflow-hidden">
-                        <!-- Yuqori qism -->
+                    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        <!-- Yuqori qism (gradient) -->
                         <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 md:p-8">
                             <div class="flex justify-between items-start mb-6">
-                                <h2 class="text-2xl md:text-3xl font-bold text-blue-700">${roleTitle} Ma'lumotlari</h2>
-                                <button onclick="editUser(${user.id})" class="flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium text-sm md:text-base shadow-md transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <h2 class="text-2xl md:text-3xl font-bold text-blue-800">${roleTitle} Ma'lumotlari</h2>
+                                <button onclick="editUser(${user.id})" class="flex items-center gap-2 px-5 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium text-sm md:text-base shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:h-6 md:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                     </svg>
                                     Tahrirlash
                                 </button>
                             </div>
 
-                            <!-- Asosiy ma'lumotlar -->
+                            <!-- Asosiy 3 ta ustun -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">F.I.O</p>
-                                    <p class="text-lg md:text-xl font-bold text-gray-800 mt-1">${user.fullName || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">F.I.O</p>
+                                    <p class="text-xl md:text-1xl font-bold text-gray-800">${user.fullName || '-'}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Yoshi</p>
-                                    <p class="text-lg md:text-xl font-bold text-gray-800 mt-1">${user.age || '-'} yosh</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Yoshi</p>
+                                    <p class="text-xl md:text-1xl font-bold text-gray-800">${user.age || '-'} yosh</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Manzil</p>
-                                    <p class="text-lg md:text-xl font-bold text-gray-800 mt-1">${user.address || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Manzil</p>
+                                    <p class="text-xl md:text-1xl font-bold text-gray-800">${user.address || '-'}</p>
                                 </div>
                             </div>
 
                             <!-- Sanalar -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Tug'ilgan sana</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800 mt-1">${user.brithDate || user.birthDate || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Tug'ilgan sana</p>
+                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.brithDate || user.birthDate || '-'}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Ishga kirgan sana</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800 mt-1">${user.hireDate || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Ishga kirgan sana</p>
+                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.hireDate || '-'}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Ishdan bo'shagan sana</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800 mt-1">${user.fireDate ? user.fireDate : 'Hozircha yo'q'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Ishdan bo‘shagan sana</p>
+                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.fireDate ? user.fireDate : 'Hozircha yo‘q'}</p>
                                 </div>
                             </div>
 
                             <!-- Identifikatorlar -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">PNFL</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800 mt-1">${user.pnfl || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">PNFL</p>
+                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.pnfl || '-'}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Telefon</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800 mt-1">${user.phoneNumber || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Telefon</p>
+                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.phoneNumber || '-'}</p>
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-600 font-semibold uppercase tracking-wide">Passport raqami</p>
-                                    <p class="text-base md:text-lg font-semibold text-gray-800 mt-1">${user.passportNumber || '-'}</p>
+                                    <p class="text-xs md:text-sm text-gray-600 font-medium">Passport raqami</p>
+                                    <p class="text-base md:text-lg font-semibold text-gray-800">${user.passportNumber || '-'}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Hozirgi Balans -->
-                        <div class="bg-white p-6 md:p-8 border-b border-gray-200">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl md:text-2xl font-bold text-gray-800">Hozirgi Balans</h3>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">$1,950</span>
-                                    <span class="text-lg md:text-xl text-gray-500 font-semibold">USD</span>
-                                </div>
+                        <!-- Rangli kartalar (50% ga yaqin kichikroq) -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 p-6 md:p-8 bg-gray-50">
+                            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl p-6 text-white text-center shadow-xl">
+                                <p class="text-base font-medium opacity-90">Oyliklar</p>
+                                <p class="text-3xl md:text-4xl font-bold mt-4">$2400</p>
+                                <p class="text-xs md:text-sm mt-3 opacity-80">2 ta to‘lov</p>
                             </div>
-
-                            <!-- Statistika -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border-l-4 border-green-500">
-                                    <p class="text-xs text-gray-600 font-medium">Jami Daromad</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-800 mt-2">$3,200</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border-l-4 border-red-500">
-                                    <p class="text-xs text-gray-600 font-medium">Jami Xarajat</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-800 mt-2">$1,250</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border-l-4 border-yellow-500">
-                                    <p class="text-xs text-gray-600 font-medium">Avanslar</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-800 mt-2">$500</p>
-                                </div>
-                                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border-l-4 border-purple-500">
-                                    <p class="text-xs text-gray-600 font-medium">Bonuslar</p>
-                                    <p class="text-xl md:text-2xl font-bold text-gray-800 mt-2">$300</p>
-                                </div>
+                            <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-6 text-white text-center shadow-xl">
+                                <p class="text-base font-medium opacity-90">Avanslar</p>
+                                <p class="text-3xl md:text-4xl font-bold mt-4">$500</p>
+                                <p class="text-xs md:text-sm mt-3 opacity-80">1 ta to‘lov</p>
                             </div>
-
-                            <!-- Tugmalar -->
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <button onclick="openSalaryModal(${user.id})" class="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold text-sm md:text-base shadow-md transition-all hover:-translate-y-1">
-                                    <span>💰</span>
-                                    <span>Oylik Yozish</span>
-                                </button>
-                                <button onclick="openAdvanceModal(${user.id})" class="flex items-center justify-center gap-2 px-6 py-3 bg-orange-600 text-white rounded-xl hover:bg-orange-700 font-semibold text-sm md:text-base shadow-md transition-all hover:-translate-y-1">
-                                    <span>💳</span>
-                                    <span>Avans Berish</span>
-                                </button>
-                                <button onclick="openBonusModal(${user.id})" class="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold text-sm md:text-base shadow-md transition-all hover:-translate-y-1">
-                                    <span>🎁</span>
-                                    <span>Bonus Berish</span>
-                                </button>
-                                <button onclick="openReportModal(${user.id})" class="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold text-sm md:text-base shadow-md transition-all hover:-translate-y-1">
-                                    <span>📊</span>
-                                    <span>Hisobot Yuklash</span>
-                                </button>
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 text-white text-center shadow-xl">
+                                <p class="text-base font-medium opacity-90">Bonuslar</p>
+                                <p class="text-3xl md:text-4xl font-bold mt-4">$300</p>
+                                <p class="text-xs md:text-sm mt-3 opacity-80">1 ta to‘lov</p>
                             </div>
-                        </div>
-
-                        <!-- Bajarilgan Resylar -->
-                        <div class="bg-gray-50 p-6 md:p-8">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                                <h3 class="text-xl md:text-2xl font-bold text-gray-800">Bajarilgan Resylar</h3>
-                                <div class="flex gap-2 bg-white p-1 rounded-xl shadow-sm overflow-x-auto">
-                                    <button onclick="filterTasks('all', this)" class="filter-tab active px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">Barchasi</button>
-                                    <button onclick="filterTasks('completed', this)" class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">Bajarilgan</button>
-                                    <button onclick="filterTasks('in-progress', this)" class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">Jarayonda</button>
-                                    <button onclick="filterTasks('pending', this)" class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap">Kutilmoqda</button>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4" id="taskList">
-                                <!-- Task 1 -->
-                                <div class="task-item bg-white rounded-xl p-5 border-l-4 border-green-500 cursor-pointer hover:shadow-md transition-all" data-status="completed">
-                                    <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-3">
-                                        <div>
-                                            <h4 class="text-base md:text-lg font-bold text-gray-800">Toshkent - Samarqand yo'nalishi</h4>
-                                            <p class="text-sm text-gray-500 mt-1">26.01.2026</p>
-                                        </div>
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase">Bajarilgan</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-4 md:gap-6 text-sm text-gray-600">
-                                        <div class="flex items-center gap-2">
-                                            <span>📍</span>
-                                            <span class="font-medium">420 km</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>💵</span>
-                                            <span class="font-medium">$350</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>⏱️</span>
-                                            <span class="font-medium">6 soat</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Task 2 -->
-                                <div class="task-item bg-white rounded-xl p-5 border-l-4 border-blue-500 cursor-pointer hover:shadow-md transition-all" data-status="in-progress">
-                                    <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-3">
-                                        <div>
-                                            <h4 class="text-base md:text-lg font-bold text-gray-800">Toshkent - Buxoro yo'nalishi</h4>
-                                            <p class="text-sm text-gray-500 mt-1">27.01.2026</p>
-                                        </div>
-                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold uppercase">Jarayonda</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-4 md:gap-6 text-sm text-gray-600">
-                                        <div class="flex items-center gap-2">
-                                            <span>📍</span>
-                                            <span class="font-medium">575 km</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>💵</span>
-                                            <span class="font-medium">$480</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>⏱️</span>
-                                            <span class="font-medium">8 soat</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Task 3 -->
-                                <div class="task-item bg-white rounded-xl p-5 border-l-4 border-yellow-500 cursor-pointer hover:shadow-md transition-all" data-status="pending">
-                                    <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-3">
-                                        <div>
-                                            <h4 class="text-base md:text-lg font-bold text-gray-800">Toshkent - Andijon yo'nalishi</h4>
-                                            <p class="text-sm text-gray-500 mt-1">28.01.2026</p>
-                                        </div>
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg text-xs font-bold uppercase">Kutilmoqda</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-4 md:gap-6 text-sm text-gray-600">
-                                        <div class="flex items-center gap-2">
-                                            <span>📍</span>
-                                            <span class="font-medium">365 km</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>💵</span>
-                                            <span class="font-medium">$320</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>⏱️</span>
-                                            <span class="font-medium">5 soat</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Task 4 -->
-                                <div class="task-item bg-white rounded-xl p-5 border-l-4 border-green-500 cursor-pointer hover:shadow-md transition-all" data-status="completed">
-                                    <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-3">
-                                        <div>
-                                            <h4 class="text-base md:text-lg font-bold text-gray-800">Toshkent - Namangan yo'nalishi</h4>
-                                            <p class="text-sm text-gray-500 mt-1">25.01.2026</p>
-                                        </div>
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase">Bajarilgan</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-4 md:gap-6 text-sm text-gray-600">
-                                        <div class="flex items-center gap-2">
-                                            <span>📍</span>
-                                            <span class="font-medium">330 km</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>💵</span>
-                                            <span class="font-medium">$290</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>⏱️</span>
-                                            <span class="font-medium">5 soat</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Task 5 -->
-                                <div class="task-item bg-white rounded-xl p-5 border-l-4 border-green-500 cursor-pointer hover:shadow-md transition-all" data-status="completed">
-                                    <div class="flex flex-col md:flex-row justify-between items-start gap-3 mb-3">
-                                        <div>
-                                            <h4 class="text-base md:text-lg font-bold text-gray-800">Toshkent - Farg'ona yo'nalishi</h4>
-                                            <p class="text-sm text-gray-500 mt-1">24.01.2026</p>
-                                        </div>
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase">Bajarilgan</span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-4 md:gap-6 text-sm text-gray-600">
-                                        <div class="flex items-center gap-2">
-                                            <span>📍</span>
-                                            <span class="font-medium">380 km</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>💵</span>
-                                            <span class="font-medium">$340</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <span>⏱️</span>
-                                            <span class="font-medium">6 soat</span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl p-6 text-white text-center shadow-xl">
+                                <p class="text-base font-medium opacity-90">Sof daromad</p>
+                                <p class="text-3xl md:text-4xl font-bold mt-4">$1950</p>
+                                <p class="text-xs md:text-sm mt-3 opacity-80">Xarajatlar: $250</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <style>
-                .filter-tab {
-                    color: #6b7280;
-                }
-                .filter-tab.active {
-                    background: #3b82f6;
-                    color: white;
-                }
-                .filter-tab:hover:not(.active) {
-                    background: #f3f4f6;
-                    color: #1f2937;
-                }
-            </style>
-
-            <script>
-                function filterTasks(status, button) {
-                    // Remove active from all tabs
-                    document.querySelectorAll('.filter-tab').forEach(tab => {
-                        tab.classList.remove('active');
-                    });
-                    
-                    // Add active to clicked tab
-                    button.classList.add('active');
-                    
-                    // Filter tasks
-                    const tasks = document.querySelectorAll('.task-item');
-                    tasks.forEach(task => {
-                        if (status === 'all') {
-                            task.style.display = 'block';
-                        } else {
-                            if (task.dataset.status === status) {
-                                task.style.display = 'block';
-                            } else {
-                                task.style.display = 'none';
-                            }
-                        }
-                    });
-                }
-            </script>
         `;
 
-        detailsSection.scrollIntoView({ behavior: 'smooth' });
+            detailsSection.scrollIntoView({ behavior: 'smooth' });
 
-    } catch (error) {
-        console.error('View user error:', error);
-        showNotify("Maʼlumot yuklashda xatolik!", "Console ni tekshiring (F12).");
+        } catch (error) {
+            console.error('View user error:', error);
+            showNotify("Maʼlumot yuklashda xatolik!", "Console ni tekshiring (F12).");
+        }
     }
-}
 
     function closeUserDetails() {
         const detailsSection = document.getElementById('userDetailsSection');
