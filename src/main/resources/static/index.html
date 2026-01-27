@@ -1523,46 +1523,22 @@
             headers: { 'Authorization': `Bearer ${authToken}` }
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP xatosi: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP xatosi: ${response.status}`);
         const result = await response.json();
-
-        if (!result.success || !result.object) {
-            showNotify("Muammo mavjud!", 'Foydalanuvchi maʼlumotlari yuklanmadi!');
-            return;
-        }
+        if (!result.success || !result.object) return;
 
         const user = result.object;
 
-        // Asosiy ro'yxat elementlarini yashirish
-        const usersHeader = document.getElementById('usersHeader');
-        const userTypeTabs = document.getElementById('userTypeTabs');
-        const usersList = document.getElementById('usersList');
-
-        if (usersHeader) usersHeader.classList.add('hidden');
-        if (userTypeTabs) userTypeTabs.classList.add('hidden');
-        if (usersList) usersList.classList.add('hidden');
+        // Ro'yxatni yashirish
+        document.getElementById('usersHeader')?.classList.add('hidden');
+        document.getElementById('userTypeTabs')?.classList.add('hidden');
+        document.getElementById('usersList')?.classList.add('hidden');
 
         const detailsSection = document.getElementById('userDetailsSection');
-        if (!detailsSection) {
-            showNotify("Xatolik!", 'userDetailsSection topilmadi!');
-            return;
-        }
         detailsSection.classList.remove('hidden');
 
-        // Role ga qarab o'zbekcha nomlash
-        let roleTitle = '';
-        switch (user.role) {
-            case 'DRIVER':   roleTitle = 'Haydovchi'; break;
-            case 'MANAGER':  roleTitle = 'Menejer'; break;
-            case 'ECONOMIST': roleTitle = 'Iqtisodchi'; break;
-            case 'DIRECTOR':  roleTitle = 'Direktor'; break;
-            default:         roleTitle = 'Foydalanuvchi';
-        }
+        let roleTitle = user.role === 'DRIVER' ? 'Haydovchi' : 'Xodim';
 
-        // HTML tarkibini driver-management.html dizayniga moslash
         detailsSection.innerHTML = `
             <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px; font-family: 'Outfit', sans-serif;">
                 
@@ -1575,81 +1551,153 @@
                 <div class="driver-info-card" style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
                         <h1 style="font-size: 28px; font-weight: 700; color: #1e293b;">${roleTitle} Ma'lumotlari</h1>
-                        <button onclick="editUser(${user.id})" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                            <span>✏️</span> Tahrirlash
-                        </button>
+                        <button onclick="editUser(${user.id})" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer;">✏️ Tahrirlash</button>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px;">
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">F.I.O</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.fullName || '-'}</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Yoshi</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.age || '-'} yosh</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Manzil</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.address || '-'}</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Tug'ilgan sana</span>
-                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.birthDate || '-'}</span>
+                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.brithDate || '-'}</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Ishga kirgan sana</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.hireDate || '-'}</span>
                         </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">PNFL</span>
-                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.pnfl || '-'}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
                             <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Telefon</span>
                             <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.phoneNumber || '-'}</span>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <span style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase;">Passport raqami</span>
-                            <span style="font-size: 18px; font-weight: 600; color: #1e293b;">${user.passportNumber || '-'}</span>
                         </div>
                     </div>
                 </div>
 
-                <div style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0;">
+                <div style="background: white; border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                        <h2 style="font-size: 24px; font-weight: 700;">Hozirgi Balans</h2>
+                        <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Hozirgi Balans</h2>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6;">$1,950</span>
-                            <span style="font-size: 24px; color: #64748b;">USD</span>
+                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6; font-family: 'JetBrains Mono', monospace;">$1,950</span>
+                            <span style="font-size: 24px; color: #64748b; font-weight: 600;">USD</span>
                         </div>
                     </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Daromad</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$3,200</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Xarajat</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$1,250</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Avanslar</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$500</div>
+                        </div>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #a855f7;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Bonuslar</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$300</div>
+                        </div>
+                    </div>
+
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <button onclick="openModal('salaryModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer;">💰 Oylik Yozish</button>
+                        <button onclick="toggleFinanceView(${user.id})" id="btnFinance" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer;">💰 Oyliklarni ko'rish</button>
                         <button onclick="openModal('advanceModal')" style="padding: 16px; border-radius: 12px; border: none; background: #f97316; color: white; font-weight: 600; cursor: pointer;">💳 Avans Berish</button>
                         <button onclick="openModal('bonusModal')" style="padding: 16px; border-radius: 12px; border: none; background: #10b981; color: white; font-weight: 600; cursor: pointer;">🎁 Bonus Berish</button>
-                        <button onclick="openModal('reportModal')" style="padding: 16px; border-radius: 12px; border: none; background: #3b82f6; color: white; font-weight: 600; cursor: pointer;">📊 Hisobot Yuklash</button>
+                        <button onclick="showTripsView(${user.id})" id="btnTrips" style="padding: 16px; border-radius: 12px; border: 1px solid #3b82f6; background: white; color: #3b82f6; font-weight: 600; cursor: pointer;">🚚 Reyslarni ko'rish</button>
                     </div>
                 </div>
-                <div style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0;">
-                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 25px;">Bajarilgan Resylar</h2>
-                    <div id="userTripsList">
-                        <div style="text-align: center; padding: 20px; color: #64748b;">Yuklanmoqda...</div>
-                    </div>
+
+                <div id="dynamicContentSection" style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <h2 id="dynamicTitle" style="font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 25px;">Bajarilgan Resylar</h2>
+                    <div id="dynamicListContainer" style="display: flex; flex-direction: column; gap: 15px;">
+                        </div>
                 </div>
             </div>
         `;
 
-        // Detallar bo'limiga fokus qilish
-        detailsSection.scrollIntoView({ behavior: 'smooth' });
-
-        // Foydalanuvchining resylarini alohida yuklash (ixtiyoriy, agar API bo'lsa)
-        // loadUserTrips(userId);
+        showTripsView(user.id); // Default reyslarni ko'rsatish
 
     } catch (error) {
-        console.error('View user error:', error);
-        showNotify("Xatolik!", "Ma'lumotlarni yuklashda xatolik yuz berdi.");
+        console.error('Xatolik:', error);
     }
+}
+
+// REYSLARNI KO'RSATISH
+async function showTripsView(userId) {
+    const container = document.getElementById('dynamicListContainer');
+    const title = document.getElementById('dynamicTitle');
+    title.innerText = "Bajarilgan Resylar";
+    container.innerHTML = "Yuklanmoqda...";
+
+    try {
+        const response = await fetch(`${API_BASE}/user/trips/${userId}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const result = await response.json();
+
+        if (!result.success || !result.object || result.object.length === 0) {
+            container.innerHTML = "Reyslar topilmadi.";
+            return;
+        }
+
+        container.innerHTML = result.object.map(trip => `
+            <div style="background: #f8fafc; border-radius: 12px; padding: 20px; border-left: 5px solid #10b981; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 600;">${trip.fromLocation} — ${trip.toLocation}</div>
+                    <div style="font-size: 13px; color: #64748b;">${trip.date}</div>
+                    <div style="margin-top: 5px; font-size: 14px;">📍 ${trip.distance} km | 💵 $${trip.price}</div>
+                </div>
+                <span style="color: #10b981; font-weight: 700; font-size: 12px;">BAJARILGAN</span>
+            </div>
+        `).join('');
+    } catch (e) { container.innerHTML = "Xatolik!"; }
+}
+
+// OYLIK VA MOLIYAVIY MA'LUMOTLARNI KO'RSATISH
+async function toggleFinanceView(userId) {
+    const container = document.getElementById('dynamicListContainer');
+    const title = document.getElementById('dynamicTitle');
+    title.innerText = "Oylik, Bonus va Avanslar";
+    container.innerHTML = "Yuklanmoqda...";
+
+    try {
+        // Bu yerda oyliklar uchun API chaqiriladi
+        const response = await fetch(`${API_BASE}/user/finance/${userId}`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        const result = await response.json();
+
+        if (!result.success || !result.object) {
+            container.innerHTML = "Moliyaviy ma'lumotlar topilmadi.";
+            return;
+        }
+
+        // Kelgan datani (salary, bonus, advance) bitta ro'yxatga jamlab chiqarish
+        container.innerHTML = result.object.map(item => `
+            <div style="background: #f8fafc; border-radius: 12px; padding: 20px; border-left: 5px solid ${item.type === 'SALARY' ? '#3b82f6' : item.type === 'BONUS' ? '#10b981' : '#f97316'}; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-weight: 700; color: #1e293b;">${item.type === 'SALARY' ? 'Oylik' : item.type === 'BONUS' ? 'Bonus' : 'Avans'}</div>
+                    <div style="font-size: 13px; color: #64748b;">Sana: ${item.date}</div>
+                    <div style="font-size: 14px; color: #475569; margin-top: 5px;">Izoh: ${item.comment || 'Mavjud emas'}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 18px; font-weight: 800; color: #1e293b;">$${item.amount}</div>
+                    <span style="font-size: 11px; color: #64748b;">USD</span>
+                </div>
+            </div>
+        `).join('');
+    } catch (e) { container.innerHTML = "Moliyaviy ma'lumotlarni yuklashda xatolik!"; }
 }
 
     function closeUserDetails() {
