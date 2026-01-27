@@ -2104,76 +2104,128 @@
     }
 
     async function printTripCheck(tripId) {
-        try {
-            const response = await fetch(`${API_BASE}/trip/${tripId}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
-            });
-            const data = await response.json();
-            if (!data.success) return;
+    try {
+        // 0. Eski print-section bo‘lsa o‘chiramiz
+        const oldSection = document.getElementById('print-section');
+        if (oldSection) oldSection.remove();
 
-            const trip = data.object;
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=TripID-${trip.id}`;
+        // 1. Trip ma'lumotini olish
+        const response = await fetch(`${API_BASE}/trip/${tripId}`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
 
-            // 1. Vaqtinchalik konteyner yaratish
-            const printContainer = document.createElement('div');
-            printContainer.id = 'print-section';
+        const data = await response.json();
+        if (!data.success) return;
 
-            // 2. innerHTML orqali chek strukturasini berish
-            printContainer.innerHTML = `
-            <div style="width: 80mm; font-family: 'Courier New', monospace; padding: 10px; color: black; background: white;">
-                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                    <h2 style="margin: 0; font-size: 18px; text-transform: uppercase;">Logistics Check</h2>
-                    <p style="font-size: 10px; margin: 5px 0;">Sana: ${new Date().toLocaleString()}</p>
+        const trip = data.object;
+
+        // 2. QR code URL (scanner ochilishi uchun)
+        const qrData = `https://track-menejment2.onrender.com/trips/${trip.id}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(qrData)}`;
+
+        // 3. Xarajatlarni hisoblash (frontend faqat yig‘adi)
+        const totalExpenses =
+            (trip.driverIncomeUsd || 0) +
+            (trip.driverPersonalExpenseUsd || 0) +
+            (trip.totalTruckExpenseUsd || 0) +
+            (trip.totalTripExpenseUsd || 0) +
+            (trip.totalFuelUsd || 0);
+
+        // 4. Print konteyner
+        const printContainer = document.createElement('div');
+        printContainer.id = 'print-section';
+
+        printContainer.innerHTML = `
+        <div style="width:80mm; font-family:'Courier New', monospace; padding:10px; color:#000; background:#fff;">
+            
+            <div style="text-align:center; border-bottom:1px dashed #000; padding-bottom:8px; margin-bottom:8px;">
+                <h2 style="margin:0; font-size:16px;">LOGISTICS CHECK</h2>
+                <p style="margin:4px 0; font-size:10px;">
+                    Sana: ${new Date().toLocaleString()}
+                </p>
+            </div>
+
+            <div style="font-size:11px; line-height:1.5;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Reys:</span>
+                    <span>${trip.routeFrom} - ${trip.routeTo}</span>
                 </div>
-
-                <div style="font-size: 12px; line-height: 1.6;">
-                    <p style="margin: 0; display: flex; justify-content: space-between;"><b>Reys:</b> <span>${trip.routeFrom} - ${trip.routeTo}</span></p>
-                    <p style="margin: 0; display: flex; justify-content: space-between;"><b>Mashina:</b> <span>${trip.truckNumber}</span></p>
-                    <p style="margin: 0; display: flex; justify-content: space-between;"><b>Haydovchi:</b> <span>${trip.driverFullName}</span></p>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Mashina:</span>
+                    <span>${trip.truckNumber}</span>
                 </div>
-
-                <div style="border-top: 1px solid #000; margin-top: 10px; padding-top: 10px; font-size: 11px;">
-                    <div style="display: flex; justify-content: space-between;"><span>Daromad:</span> <b>$${trip.totalIncomeUsd.toFixed(2)}</b></div>
-                    <div style="display: flex; justify-content: space-between;"><span>Jami xarajat:</span> <b>-$${(trip.totalFuelCostUsd + trip.totalTripExpensesUsd + trip.truckExpensesTotalUsd + trip.driverIncomeUsd).toFixed(2)}</b></div>
-                </div>
-
-                <div style="border-top: 2px solid #000; margin-top: 10px; padding-top: 5px; display: flex; justify-content: space-between; font-size: 15px; font-weight: bold;">
-                    <span>SOF FOYDA:</span>
-                    <span>$${trip.profitUsd.toFixed(2)}</span>
-                </div>
-
-                <div style="margin-top: 20px; text-align: center;">
-                    <img src="${qrUrl}" style="width: 80px; height: 80px; display: inline-block;">
-                    <p style="font-size: 9px; margin-top: 5px;">ID: #TRP-${trip.id}</p>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Haydovchi:</span>
+                    <span>${trip.driverFullName}</span>
                 </div>
             </div>
+
+            <div style="border-top:1px solid #000; margin-top:8px; padding-top:6px; font-size:11px;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Daromad:</span>
+                    <b>$${trip.totalIncomeUsd.toFixed(2)}</b>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>Jami xarajat:</span>
+                    <b>-$${totalExpenses.toFixed(2)}</b>
+                </div>
+            </div>
+
+            <div style="border-top:2px solid #000; margin-top:8px; padding-top:6px; display:flex; justify-content:space-between; font-size:14px; font-weight:bold;">
+                <span>SOF FOYDA:</span>
+                <span>$${trip.profitUsd.toFixed(2)}</span>
+            </div>
+
+            <div style="margin-top:15px; text-align:center;">
+                <img src="${qrUrl}" style="width:80px; height:80px;" />
+                <div style="font-size:9px; margin-top:4px;">
+                    ID: #TRP-${trip.id}
+                </div>
+            </div>
+        </div>
         `;
 
-            // 3. CSS orqali sahifani printga tayyorlash
-            const style = document.createElement('style');
-            style.innerHTML = `
+        // 5. Print CSS
+        const style = document.createElement('style');
+        style.innerHTML = `
             @media print {
-                body * { visibility: hidden; }
-                #print-section, #print-section * { visibility: visible; }
-                #print-section { position: absolute; left: 0; top: 0; width: 80mm; }
+                body * {
+                    visibility: hidden;
+                }
+                #print-section, #print-section * {
+                    visibility: visible;
+                }
+                #print-section {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 80mm;
+                }
+                body {
+                    margin: 0;
+                }
             }
         `;
 
-            // Sahifaga qo'shish
-            document.body.appendChild(style);
-            document.body.appendChild(printContainer);
+        document.body.appendChild(style);
+        document.body.appendChild(printContainer);
 
-            // 4. Chop etish
+        // 6. QR yuklanishini kutib print qilish
+        setTimeout(() => {
             window.print();
 
-            // 5. Tozalash (print oynasi yopilgandan keyin)
-            document.body.removeChild(printContainer);
-            document.body.removeChild(style);
+            // 7. Tozalash
+            printContainer.remove();
+            style.remove();
+        }, 500);
 
-        } catch (error) {
-            console.error('Print error:', error);
-        }
+    } catch (error) {
+        console.error('Print error:', error);
     }
+}
+
     //trip expense
     // 1. Modalni ochish (Ochilganda ham tozalanadi)
     function addTruckExpense(tripId, truckId) {
