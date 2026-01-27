@@ -2105,21 +2105,22 @@
 
     async function printTripCheck(tripId) {
         try {
-            const response = await fetch(${API_BASE}/trip/${tripId}, {
-                headers: { 'Authorization': Bearer ${authToken} }
+            const response = await fetch(`${API_BASE}/trip/${tripId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
             });
             const data = await response.json();
             if (!data.success) return;
 
             const trip = data.object;
-            const qrUrl = https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=TripID-${trip.id};
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=TripID-${trip.id}`;
 
             // 1. Vaqtinchalik konteyner yaratish
             const printContainer = document.createElement('div');
             printContainer.id = 'print-section';
 
             // 2. innerHTML orqali chek strukturasini berish
-            printContainer.innerHTML =             <div style="width: 80mm; font-family: 'Courier New', monospace; padding: 10px; color: black; background: white;">
+            printContainer.innerHTML = `
+            <div style="width: 80mm; font-family: 'Courier New', monospace; padding: 10px; color: black; background: white;">
                 <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
                     <h2 style="margin: 0; font-size: 18px; text-transform: uppercase;">Logistics Check</h2>
                     <p style="font-size: 10px; margin: 5px 0;">Sana: ${new Date().toLocaleString()}</p>
@@ -2146,15 +2147,18 @@
                     <p style="font-size: 9px; margin-top: 5px;">ID: #TRP-${trip.id}</p>
                 </div>
             </div>
-        ;
+        `;
+
             // 3. CSS orqali sahifani printga tayyorlash
             const style = document.createElement('style');
-            style.innerHTML =             @media print {
+            style.innerHTML = `
+            @media print {
                 body * { visibility: hidden; }
                 #print-section, #print-section * { visibility: visible; }
                 #print-section { position: absolute; left: 0; top: 0; width: 80mm; }
             }
-        ;
+        `;
+
             // Sahifaga qo'shish
             document.body.appendChild(style);
             document.body.appendChild(printContainer);
@@ -2170,7 +2174,6 @@
             console.error('Print error:', error);
         }
     }
-
     //trip expense
     // 1. Modalni ochish (Ochilganda ham tozalanadi)
     function addTruckExpense(tripId, truckId) {
