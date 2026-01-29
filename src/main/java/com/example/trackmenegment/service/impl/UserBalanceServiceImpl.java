@@ -2,6 +2,7 @@ package com.example.trackmenegment.service.impl;
 
 import com.example.trackmenegment.dto.req.UserBalanceReqDto;
 import com.example.trackmenegment.dto.res.UserBalanceResponse;
+import com.example.trackmenegment.dto.res.UserBalanceTotalResDto;
 import com.example.trackmenegment.enums.PaymentType;
 import com.example.trackmenegment.error.ByIdException;
 import com.example.trackmenegment.mapper.UserBalanceMapper;
@@ -14,6 +15,7 @@ import com.example.trackmenegment.repository.UserRepository;
 import com.example.trackmenegment.service.UserBalanceService;
 import com.example.trackmenegment.utils.ApiResponse;
 import com.example.trackmenegment.validator.UserBalanceValidator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     private final TripRepository tripRepository;
 
     @Override
+    @Transactional
     public void createDriverBalance(User user, Trip trip, BigDecimal amountUsd, Boolean isPaid) {
         UserBalance balance = UserBalance.builder()
                 .user(user)
@@ -41,10 +44,11 @@ public class UserBalanceServiceImpl implements UserBalanceService {
                 .isPaid(isPaid)
                 .operationDate(LocalDate.now())
                 .build();
-         userBalanceRepository.save(balance);
+        userBalanceRepository.save(balance);
     }
 
     @Override
+    @Transactional
     public ApiResponse create(UserBalanceReqDto dto) {
 
         validator.validateForCreate(dto);
@@ -69,5 +73,12 @@ public class UserBalanceServiceImpl implements UserBalanceService {
                 .map(mapper::toDto)
                 .toList();
         return new ApiResponse("List of user balance", true, list);
+    }
+
+    @Override
+    public ApiResponse totalBalance(Long userId) {
+        UserBalanceTotalResDto totalBalance = userBalanceRepository.totalBalance(userId).orElseThrow(() -> new ByIdException("Total balance not found"));
+        System.out.println("jami olingan pul:"+totalBalance.getTotalPaid());
+        return new ApiResponse("total date ", true, totalBalance);
     }
 }

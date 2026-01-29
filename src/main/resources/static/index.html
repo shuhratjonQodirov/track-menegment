@@ -1687,31 +1687,55 @@
         document.getElementById('expenseForm').reset();
     }
 
-   async function viewUser(userId) {
-    try {
-        const response = await fetch(`${API_BASE}/user/${userId}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
+    async function viewUser(userId) {
+        try {
+            // 1. Foydalanuvchi ma'lumotlarini olish
+            const response = await fetch(`${API_BASE}/user/${userId}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
 
-        if (!response.ok) throw new Error(`HTTP xatosi: ${response.status}`);
-        const result = await response.json();
-        if (!result.success || !result.object) return;
+            if (!response.ok) throw new Error(`HTTP xatosi: ${response.status}`);
+            const result = await response.json();
+            if (!result.success || !result.object) return;
 
-        const user = result.object;
+            const user = result.object;
 
-        // Ro'yxatni yashirish
-        document.getElementById('usersHeader')?.classList.add('hidden');
-        document.getElementById('userTypeTabs')?.classList.add('hidden');
-        document.getElementById('usersList')?.classList.add('hidden');
+            // 2. Balans ma'lumotlarini olish (Siz yozgan API dan)
+            let balance = {
+                totalSalary: 0,
+                totalPersonal: 0,
+                totalAdvance: 0,
+                totalPenalty: 0,
+                nowBalance: 0,
+                totalPaid:0
+            };
 
-        const detailsSection = document.getElementById('userDetailsSection');
-        detailsSection.classList.remove('hidden');
+            try {
+                const balanceRes = await fetch(`${API_BASE}/user-balance/total-balance-sta/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const balanceResult = await balanceRes.json();
+                if (balanceResult.success && balanceResult.object) {
+                    balance = balanceResult.object;
+                }
+            } catch (balanceError) {
+                console.error('Balansni yuklashda xatolik:', balanceError);
+            }
 
-        let roleTitle = user.role === 'DRIVER' ? 'Haydovchi' : 'Xodim';
+            // Ro'yxatni yashirish
+            document.getElementById('usersHeader')?.classList.add('hidden');
+            document.getElementById('userTypeTabs')?.classList.add('hidden');
+            document.getElementById('usersList')?.classList.add('hidden');
 
-        detailsSection.innerHTML = `
+            const detailsSection = document.getElementById('userDetailsSection');
+            detailsSection.classList.remove('hidden');
+
+            let roleTitle = user.role === 'DRIVER' ? 'Haydovchi' : 'Xodim';
+
+            // HTML kontentini joylash (Barcha statik raqamlar dinamik o'zgaruvchilarga almashtirildi)
+            detailsSection.innerHTML = `
             <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px; font-family: 'Outfit', sans-serif;">
-                
+
                 <div style="margin-bottom: 30px;">
                     <button onclick="closeUserDetails()" style="display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; color: #475569; cursor: pointer; font-weight: 500;">
                         <span>←</span> Ortga
@@ -1756,7 +1780,9 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                         <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Hozirgi Balans</h2>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6; font-family: 'JetBrains Mono', monospace;">$1,950</span>
+                            <span style="font-size: 48px; font-weight: 800; color: #3b82f6; font-family: 'JetBrains Mono', monospace;">
+                                $${(balance.nowBalance || 0).toLocaleString()}
+                            </span>
                             <span style="font-size: 24px; color: #64748b; font-weight: 600;">USD</span>
                         </div>
                     </div>
@@ -1764,19 +1790,26 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
                         <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
                             <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Daromad</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$3,200</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$${(balance.totalSalary || 0).toLocaleString()}</div>
+                        </div>
+                         <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #01120c;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Olingan Pul</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$${(balance.totalPaid || 0).toLocaleString()}</div>
                         </div>
                         <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ef4444;">
-                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jami Xarajat</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$1,250</div>
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Shaxsiy Xarajat</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$${(balance.totalPersonal || 0).toLocaleString()}</div>
                         </div>
                         <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b;">
                             <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Avanslar</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$500</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$${(balance.totalAdvance || 0).toLocaleString()}</div>
                         </div>
-                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #a855f7;">
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #ca0b77;">
                             <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Bonuslar</div>
-                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$300</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$0</div> </div>
+                         <div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid #f755b1;">
+                            <div style="font-size: 13px; color: #64748b; margin-bottom: 8px;">Jarimalar</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #1e293b;">$${(balance.totalPenalty || 0).toLocaleString()}</div>
                         </div>
                     </div>
 
@@ -1804,12 +1837,12 @@
             </div>
         `;
 
-        showTripsView(user.id);
+            showTripsView(user.id);
 
-    } catch (error) {
-        console.error('Xatolik:', error);
+        } catch (error) {
+            console.error('Xatolik:', error);
+        }
     }
-}
 
 // REYSLARNI KO'RSATISH
 async function showTripsView(userId) {

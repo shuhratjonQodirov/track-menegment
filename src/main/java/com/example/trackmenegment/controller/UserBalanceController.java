@@ -24,7 +24,12 @@ public class UserBalanceController {
     public HttpEntity<?> addBalance(@PathVariable Long userId) {
         ApiResponse response = userBalanceService.getAll(userId);
         return ResponseEntity.ok(response);
+    }
 
+    @GetMapping("/total-balance-sta/{userId}")
+    public HttpEntity<?> totalBalance(@PathVariable Long userId){
+        ApiResponse response=userBalanceService.totalBalance(userId);
+        return ResponseEntity.ok(response);
     }
 
 

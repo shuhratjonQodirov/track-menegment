@@ -5,13 +5,18 @@ import com.example.trackmenegment.model.Trip;
 import com.example.trackmenegment.model.User;
 import com.example.trackmenegment.model.UserBalance;
 import com.example.trackmenegment.utils.ApiResponse;
+import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
 
 public interface UserBalanceService {
     void createDriverBalance(User user, Trip trip, BigDecimal amountUsd, Boolean isPaid);
 
+    @Transactional
     ApiResponse create(UserBalanceReqDto dto);
 
+
     ApiResponse getAll(Long userId);
+
+    ApiResponse totalBalance(Long userId);
 }
