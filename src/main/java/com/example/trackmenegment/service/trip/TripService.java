@@ -29,4 +29,5 @@ public interface TripService {
 
     ApiResponse updateTrip(Long id, TripReqDto tripReqDto);
 
+    ApiResponse getTripByUserId(Long userId);
 }

@@ -26,5 +26,5 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
 
     Optional<Trip> findByTruckAndDeletedFalse(Truck truck);
-    Optional<Trip> findByUserAndDeletedFalse(User user);
+    List<Trip> findAllByUserAndDeletedFalse(User user);
 }

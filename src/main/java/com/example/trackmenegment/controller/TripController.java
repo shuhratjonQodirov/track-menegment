@@ -37,4 +37,9 @@ public class TripController {
         ApiResponse response = tripService.updateTrip(id, tripReqDto);
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/user-trips/{userId}")
+        public HttpEntity<?> getTripsByUserId(@PathVariable Long userId){
+        ApiResponse response=tripService.getTripByUserId(userId);
+        return ResponseEntity.ok(response);
+    }
 }

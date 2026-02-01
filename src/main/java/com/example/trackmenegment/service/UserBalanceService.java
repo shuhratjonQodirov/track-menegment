@@ -3,9 +3,9 @@ package com.example.trackmenegment.service;
 import com.example.trackmenegment.dto.req.UserBalanceReqDto;
 import com.example.trackmenegment.model.Trip;
 import com.example.trackmenegment.model.User;
-import com.example.trackmenegment.model.UserBalance;
 import com.example.trackmenegment.utils.ApiResponse;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 
@@ -19,4 +19,6 @@ public interface UserBalanceService {
     ApiResponse getAll(Long userId);
 
     ApiResponse totalBalance(Long userId);
+
+    ApiResponse update(Long userId, UserBalanceReqDto dto);
 }

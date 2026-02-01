@@ -59,6 +59,11 @@ public class UserBalanceServiceImpl implements UserBalanceService {
             trip = tripRepository.findByIdAndDeletedFalse(dto.getTripId()).orElseThrow(() -> new ByIdException("trip not found"));
         }
         UserBalance balance = mapper.toEntity(dto, user, trip);
+        if (dto.getPaymentType() == PaymentType.PENALTY ||
+                dto.getPaymentType() == PaymentType.PERSONAL ||
+                dto.getPaymentType() == PaymentType.ADVANCE) {
+            balance.setIsPaid(true);
+        }
         userBalanceRepository.save(balance);
         return new ApiResponse(
                 "balance successfully created", true
@@ -69,7 +74,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Override
     public ApiResponse getAll(Long userId) {
         User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(() -> new ByIdException("User not found"));
-        List<UserBalanceResponse> list = userBalanceRepository.findAllByUserAndDeletedFalse(user).stream()
+        List<UserBalanceResponse> list = userBalanceRepository.findAllByUserAndDeletedFalseOrderByCreatedAtAsc(user).stream()
                 .map(mapper::toDto)
                 .toList();
         return new ApiResponse("List of user balance", true, list);
@@ -78,7 +83,20 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     @Override
     public ApiResponse totalBalance(Long userId) {
         UserBalanceTotalResDto totalBalance = userBalanceRepository.totalBalance(userId).orElseThrow(() -> new ByIdException("Total balance not found"));
-        System.out.println("jami olingan pul:"+totalBalance.getTotalPaid());
         return new ApiResponse("total date ", true, totalBalance);
+    }
+
+    @Override
+    @Transactional
+    public ApiResponse update(Long userBalanceId, UserBalanceReqDto dto) {
+        UserBalance userBalance = userBalanceRepository.findByIdAndDeletedFalse(userBalanceId).orElseThrow(() -> new ByIdException("User Balance not found"));
+        Trip trip = null;
+        if (dto.getTripId() != null && dto.getTripId() != 0) {
+            trip = tripRepository.findByIdAndDeletedFalse(dto.getTripId())
+                    .orElseThrow(() -> new ByIdException("Ko'rsatilgan reys topilmadi"));
+        }
+        mapper.toUpdateEntity(userBalance, dto, trip);
+        userBalanceRepository.save(userBalance);
+        return new ApiResponse("Moliya yozuvi muvaffaqiyatli yangilandi",true,false);
     }
 }

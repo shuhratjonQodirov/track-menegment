@@ -16,7 +16,7 @@ import java.util.Optional;
 public interface UserBalanceRepository extends JpaRepository<UserBalance, Long> {
     List<UserBalance> findAllByTripAndDeletedFalse(Trip trip);
 
-    List<UserBalance> findAllByUserAndDeletedFalse(User user);
+    List<UserBalance> findAllByUserAndDeletedFalseOrderByCreatedAtAsc(User user);
 
     Optional<UserBalance> findByIdAndDeletedFalse(Long id);
 

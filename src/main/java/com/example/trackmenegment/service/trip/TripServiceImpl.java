@@ -43,11 +43,11 @@ public class TripServiceImpl implements TripService {
         Trip trip = tripMapper.toEntity(reqTripDto, user, truck);
 
         Trip save = tripRepository.save(trip);
-         userBalanceService.createDriverBalance(
-                 user,
-                 save
-                 , reqTripDto.getDriverIncomeUsd(),
-                 reqTripDto.getDriverIncomePaid());
+        userBalanceService.createDriverBalance(
+                user,
+                save
+                , reqTripDto.getDriverIncomeUsd(),
+                reqTripDto.getDriverIncomePaid());
 
         return new ApiResponse("yangi sayoxat saqlandi", true);
     }
@@ -166,6 +166,15 @@ public class TripServiceImpl implements TripService {
         return new ApiResponse("Trip successfully updated", true);
     }
 
+    @Override
+    public ApiResponse getTripByUserId(Long userId) {
+        User user = userRepository.findByIdAndDeletedFalse(userId).orElseThrow(() -> new ByIdException("User not found"));
+        List<TripResDto> list = tripRepository.findAllByUserAndDeletedFalse(user).stream()
+                .map(tripMapper::toDto).toList();
+
+        return new ApiResponse("Driver Tomonidan bajarilgan reyslar", true, list);
+    }
+
 
     public int calculateTripDuration(LocalDate startedDate, LocalDate finishedDate) {
         if (startedDate == null) {
@@ -208,7 +217,7 @@ public class TripServiceImpl implements TripService {
     private BigDecimal calculatePersonalExpenseByTrip(List<UserBalance> userBalanceList) {
         return userBalanceList.stream().
                 filter(driverBalance ->
-                        driverBalance.getPaymentType() == PaymentType.PERSONAL || driverBalance.getPaymentType() == PaymentType.ADVANCE)
+                        driverBalance.getPaymentType() == PaymentType.PERSONAL || driverBalance.getPaymentType() == PaymentType.ADVANCE || driverBalance.getPaymentType() == PaymentType.PENALTY)
                 .map(UserBalance::getAmountUsd)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

@@ -21,4 +21,5 @@ public class UserBalanceResponse {
     private PaymentType paymentType;
     private String description;
     private LocalDate operationDate;
+    private boolean isPaid;
 }

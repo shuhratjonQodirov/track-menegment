@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +12,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -78,5 +80,24 @@ public class GlobalHandlerException {
     public ResponseEntity<ExceptionResponse> phone(
             PhoneException e, WebRequest exchange) {
         return responseResponseEntity(e, exchange, CONFLICT);
+    }
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ExceptionResponse> handleValidationExceptions(
+            MethodArgumentNotValidException e, WebRequest exchange) {
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        return new ResponseEntity<>(
+                ExceptionResponse.builder()
+                        .message(errorMessage)
+                        .occurred(LocalDateTime.now())
+                        .status(BAD_REQUEST.value())
+                        .build(),
+                BAD_REQUEST
+        );
     }
 }

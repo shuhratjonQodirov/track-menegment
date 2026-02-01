@@ -31,6 +31,16 @@ public class UserBalanceMapper {
                 .paymentType(balance.getPaymentType())
                 .amountUsd(balance.getAmountUsd())
                 .description(balance.getDescription())
+                .isPaid(balance.getIsPaid())
                 .build();
+    }
+
+    public void toUpdateEntity(UserBalance userBalance, UserBalanceReqDto dto, Trip trip) {
+        userBalance.setTrip(trip);
+        userBalance.setOperationDate(dto.getOperationDate());
+        userBalance.setIsPaid(dto.getIsPaid());
+        userBalance.setDescription(dto.getDescription());
+        userBalance.setPaymentType(dto.getPaymentType());
+        userBalance.setAmountUsd(dto.getAmountUsd());
     }
 }

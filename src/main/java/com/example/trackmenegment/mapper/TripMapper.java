@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TripMapper {
 
-    public Trip toEntity(TripReqDto reqTripDto, User user, Truck truck){
+    public Trip toEntity(TripReqDto reqTripDto, User user, Truck truck) {
         return Trip.builder()
                 .user(user)
                 .truck(truck)
@@ -27,4 +27,15 @@ public class TripMapper {
     }
 
 
+    public TripResDto toDto(Trip trip) {
+        return TripResDto.builder().id(trip.getId()).truckNumber(trip.getTruck().getTruckNumber()).fullName(trip.getUser()
+                        .getFullName())
+                .routeFrom(trip.getRouteFrom())
+                .routeTo(trip.getRouteTo())
+                .incomeOutUsd(trip.getIncomeOutUsd())
+                .incomeBackUsd(trip.getIncomeBackUsd())
+                .tripStatus(trip.getTripStatus().name()).
+                tripDuration(trip.getTripDuration())
+                .build();
+    }
 }

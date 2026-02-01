@@ -1279,10 +1279,10 @@
         try {
             const [tripsRes, trucksRes, driversRes, managersRes, economistsRes] = await Promise.all([
                 fetch(`${API_BASE}/trip/getAll`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                fetch(`${API_BASE}/truck/list-truck`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                fetch(`${API_BASE}/user/list-driver`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                fetch(`${API_BASE}/user/list-manager`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                fetch(`${API_BASE}/user/list-economist`, {headers: {'Authorization': `Bearer ${authToken}`}})
+                // fetch(`${API_BASE}/truck/list-truck`, {headers: {'Authorization': `Bearer ${authToken}`}}),
+                // fetch(`${API_BASE}/user/list-driver`, {headers: {'Authorization': `Bearer ${authToken}`}}),
+                // fetch(`${API_BASE}/user/list-manager`, {headers: {'Authorization': `Bearer ${authToken}`}}),
+                // fetch(`${API_BASE}/user/list-economist`, {headers: {'Authorization': `Bearer ${authToken}`}})
             ]);
 
             const trips = await tripsRes.json();
@@ -1561,22 +1561,39 @@
 
         // Sanani bugungi kunga sozlash
         document.getElementById('operationDate').valueAsDate = new Date();
-
+        const submitBtn = document.querySelector('#salaryForm button[type="submit"]');
         if (existingData) {
             // TAHRIRLASH REJIMI (Agar ma'lumot uzatilsa)
             isEditMode = true;
             currentBalanceId = existingData.id;
             document.getElementById('balanceAmountUsd').value = existingData.amountUsd;
-            document.getElementById('paymentType').value = existingData.paymentType;
+            const typeSelect = document.getElementById('paymentType');
+            typeSelect.value = existingData.paymentType;
+            typeSelect.disabled = true; // Tahrirlashda o'zgartirib bo'lmaydi
             document.getElementById('balanceDescription').value = existingData.description;
             document.getElementById('operationDate').value = existingData.operationDate;
-            document.getElementById('isPaid').checked = existingData.isPaid;
+
+            const paidStatus = existingData.isPaid !== undefined ? existingData.isPaid : existingData.paid;
+            document.getElementById('isPaid').checked = Boolean(paidStatus);
+
             document.querySelector('#salaryModal h3').innerText = "Balansni tahrirlash";
+            typeSelect.style.background = "#f1f5f9"; // Vizual "yopiq" ekanini bildirish
+            document.querySelector('#salaryModal h3').innerText = "Balansni tahrirlash";
+            submitBtn.innerText = "O'zgarishlarni saqlash"; // Tahrirlash rejimi uchun
+            submitBtn.classList.replace('btn-success', 'btn-primary'); // Rangini ham o'zgartirish mumkin
         } else {
+            isEditMode = false;
+            document.querySelector('#salaryModal h3').innerText = "Oylik / To'lov yozish";
+            submitBtn.innerText = "Saqlash"; // Yangi qo'shish rejimi uchun
+            submitBtn.classList.replace('btn-primary', 'btn-success');
+            const typeSelect = document.getElementById('paymentType');
+            typeSelect.disabled = false; // Yangi qo'shishda ochiq bo'ladi
+            typeSelect.style.background = "#ffffff";
+            document.getElementById('operationDate').valueAsDate = new Date();
             // YANGI QO'SHISH REJIMI
+            document.getElementById('isPaid').checked = false; // Yangi qo'shishda bo'sh bo'ladi
             document.querySelector('#salaryModal h3').innerText = "Oylik / To'lov yozish";
         }
-
         // Modalni ko'rsatish
         modal.classList.remove('hidden');
     }
@@ -1585,25 +1602,31 @@
     document.getElementById('salaryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // userId ni keyinchalik viewUser ni qayta chaqirish uchun saqlab olamiz
-        const userId = document.getElementById('balanceUserId').value;
+        // userId raqam ko'rinishida bo'lishi shart
+        const userId = parseInt(document.getElementById('balanceUserId').value);
+        const tripIdValue = document.getElementById('balanceTripId').value;
 
         const data = {
             userId: userId,
-            tripId: document.getElementById('balanceTripId').value || null,
-            amountUsd: document.getElementById('balanceAmountUsd').value,
+            // tripId bo'sh bo'lsa yoki 0 bo'lsa null yuboramiz (Backendda ixtiyoriy)
+            tripId: (tripIdValue && tripIdValue !== "0") ? parseInt(tripIdValue) : null,
+            amountUsd: parseFloat(document.getElementById('balanceAmountUsd').value),
             paymentType: document.getElementById('paymentType').value,
             description: document.getElementById('balanceDescription').value,
             operationDate: document.getElementById('operationDate').value,
             isPaid: document.getElementById('isPaid').checked
         };
 
-        // Tahrirlash yoki yangi qo'shish rejimini aniqlash
+        // Tahrirlash yoki yangi qo'shish rejimini URL va Method bo'yicha aniqlash
         const url = isEditMode
-            ? `${API_BASE}/user-balance/edit-balance?id=${currentBalanceId}`
+            ? `${API_BASE}/user-balance/update/${currentBalanceId}`
             : `${API_BASE}/user-balance/add-balance`;
 
         const method = isEditMode ? 'PUT' : 'POST';
+
+        // Tugmani vaqtincha faolsizlantirish (Double-click oldini olish)
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
 
         try {
             const response = await fetch(url, {
@@ -1618,26 +1641,34 @@
             const result = await response.json();
 
             if (response.ok && result.success) {
-                // Bildirishnomani ko'rsatish
-                showNotify("Muvaffaqiyatli !", isEditMode ? "Ma'lumot yangilandi!" : "To'lov muvaffaqiyatli qo'shildi!");
+                showNotify(
+                    "Muvaffaqiyatli!",
+                    isEditMode ? "Ma'lumot yangilandi!" : "To'lov muvaffaqiyatli qo'shildi!",
+                    "success"
+                );
 
-                // 1. Modal oynani yopish
+                // Modalni yopish va formani tozalash
                 closeSalaryModal();
 
+                // Ma'lumotlarni qayta yuklash (UI yangilash)
                 if (typeof viewUser === "function") {
                     await viewUser(userId);
                 }
 
-                if (typeof loadBalances === "function") {
-                    loadBalances();
+                // Agar moliya ro'yxati alohida bo'lsa, uni ham yangilash
+                if (typeof updateFinanceDisplay === "function") {
+                    updateFinanceDisplay(userId);
                 }
 
             } else {
-                showNotify("Xato!", result.message || "Xatolik yuz berdi", "error");
+                // Backend validatsiya xatolarini ko'rsatish
+                showNotify("Xato!", result.message || "Ma'lumot saqlanmadi", "error");
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Submit Error:', error);
             showNotify("Xato!", "Server bilan aloqa uzildi", "error");
+        } finally {
+            if (submitBtn) submitBtn.disabled = false;
         }
     });
 
@@ -1933,19 +1964,41 @@
                 <button onclick="showTripsView(${user.id})" style="padding: 18px; border-radius: 12px; border: none; background: #1a59b8; color: white; font-weight: 600; cursor: pointer;">🚚 Reyslarni ko'rish</button>
             </div>
         </div>
+   <div style="background: white; border-radius: 20px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+        <h2 id="dynamicTitle" style="font-size: 22px; font-weight: 700; color: #1e293b; margin: 0;">Moliya Tarixi</h2>
 
-        <div style="background: white; border-radius: 20px; padding: 40px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h2 id="dynamicTitle" style="font-size: 24px; font-weight: 700; color: #1e293b;">Yuklanmoqda...</h2>
-                <div id="reportDownloadContainer" class="hidden">
-                     <button onclick="downloadFinanceReport(${user.id})" style="padding: 10px 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; color: #1e293b; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                        📊 Hisobot yuklash
+        <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+            <select id="itemsPerPage" onchange="updateFinanceDisplay(${user.id})" style="padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; background: #f8fafc; font-weight: 500; cursor: pointer; outline: none;">
+                <option value="5">5 ta</option>
+                <option value="10">10 ta</option>
+                <option value="15">15 ta</option>
+                <option value="all">Hammasi</option>
+            </select>
+
+            <div id="actionButtonsContainer" style="display: flex; gap: 10px; align-items: center;">
+
+                <button onclick="toggleFinanceView(${user.id}, 'INCOME')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" style="padding: 10px 15px; border-radius: 10px; border: 1px solid #10b981; background: #f0fdf4; color: #166534; font-weight: 600; cursor: pointer; transition: 0.2s;">➕ Kirimlar</button>
+
+                <button onclick="toggleFinanceView(${user.id}, 'EXPENSE')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" style="padding: 10px 15px; border-radius: 10px; border: 1px solid #ef4444; background: #fff1f2; color: #991b1b; font-weight: 600; cursor: pointer; transition: 0.2s;">➖ Chiqimlar</button>
+
+                <div style="position: relative;">
+                    <button onclick="document.getElementById('reportDropdown').classList.toggle('hidden')" style="padding: 10px 15px; background: white; border: 1px solid #e2e8f0; border-radius: 10px; color: #1e293b; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        📊 Hisobot ▾
                     </button>
+                    <div id="reportDropdown" class="hidden" style="position: absolute; top: 45px; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000; min-width: 150px;">
+                        <div onclick="downloadFinanceReport(${user.id}, 'pdf')" style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9;">PDF yuklash</div>
+                        <div onclick="downloadFinanceReport(${user.id}, 'excel')" style="padding: 12px 15px; cursor: pointer;">Excel yuklash</div>
+                    </div>
                 </div>
-            </div>
-            <div id="dynamicListContainer" style="display: flex; flex-direction: column; gap: 15px;"></div>
-        </div>
+
+            </div> </div>
     </div>
+
+    <div id="dynamicListContainer" style="max-height: 500px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin;">
+    </div>
+</div>
+</div>
     `;
 
             // DEFAULT HOLATDA: Oyliklarni yuklaymiz (Reyslarni emas)
@@ -1957,46 +2010,151 @@
     }
 
     // REYSLARNI KO'RSATISH
+    let allUserTrips = []; // Reyslarni vaqtincha saqlash uchun
+
     async function showTripsView(userId) {
-        document.getElementById('reportDownloadContainer').classList.add('hidden');
-        const container = document.getElementById('dynamicListContainer');
         const title = document.getElementById('dynamicTitle');
-        title.innerText = "Bajarilgan Resylar";
-        container.innerHTML = "Yuklanmoqda...";
+        const container = document.getElementById('dynamicListContainer');
+        const buttonsContainer = document.getElementById('actionButtonsContainer');
+        const itemsSelect = document.getElementById('itemsPerPage');
+
+        // Sarlavhani yangilash
+        title.innerText = "Bajarilgan Reyslar";
+
+        // Pagination select-ni yashirish
+        if (itemsSelect) {
+            itemsSelect.style.display = 'none';
+        }
+
+        // Moliya tugmalari o'rniga faqat Reys filtrlarini chizish
+        buttonsContainer.innerHTML = `
+        <button onclick="filterTrips('ALL', this)" class="trip-filter-btn" style="padding: 10px 18px; border-radius: 10px; border: none; background: #1e293b; color: white; font-weight: 700; font-size: 11px; cursor: pointer; transition: 0.2s; opacity: 1;">BARCHASI</button>
+        <button onclick="filterTrips('COMPLETED', this)" class="trip-filter-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #10b981; background: #f0fdf4; color: #166534; font-weight: 700; font-size: 11px; cursor: pointer; transition: 0.2s; opacity: 0.6;">TUGALLANGAN</button>
+        <button onclick="filterTrips('IN_PROGRESS', this)" class="trip-filter-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: 700; font-size: 11px; cursor: pointer; transition: 0.2s; opacity: 0.6;">JARAYONDA</button>
+    `;
+
+        container.innerHTML = `<div style="padding: 40px; text-align: center; color: #64748b; font-family: sans-serif;">🔄 Reyslar yuklanmoqda...</div>`;
 
         try {
-            const response = await fetch(`${API_BASE}/user/trips/${userId}`, {
+            const response = await fetch(`${API_BASE}/trip/user-trips/${userId}`, {
                 headers: {'Authorization': `Bearer ${authToken}`}
             });
             const result = await response.json();
 
-            if (!result.success || !result.object || result.object.length === 0) {
-                container.innerHTML = "Reyslar topilmadi.";
-                return;
-            }
+            // Backend formatiga qarab ma'lumotni olish
+            allUserTrips = result.object || result || [];
 
-            container.innerHTML = result.object.map(trip => `
-            <div style="background: #f8fafc; border-radius: 12px; padding: 20px; border-left: 5px solid #10b981; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-weight: 600;">${trip.fromLocation} — ${trip.toLocation}</div>
-                    <div style="font-size: 13px; color: #64748b;">${trip.date}</div>
-                    <div style="margin-top: 5px; font-size: 14px;">📍 ${trip.distance} km | 💵 $${trip.price}</div>
-                </div>
-                <span style="color: #10b981; font-weight: 700; font-size: 12px;">BAJARILGAN</span>
-            </div>
-        `).join('');
+            renderTripsList(allUserTrips);
         } catch (e) {
-            container.innerHTML = "Xatolik!";
+            console.error("Xatolik:", e);
+            container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center; font-weight: bold;">Ma'lumot olishda xatolik yuz berdi!</div>`;
         }
     }
 
+    function filterTrips(status, btn) {
+        // Barcha filter tugmalarini xiralashtirish
+        document.querySelectorAll('.trip-filter-btn').forEach(b => {
+            b.style.opacity = "0.6";
+        });
+
+        // Tanlangan tugmani yorqin qilish
+        btn.style.opacity = "1";
+
+        // Filtrlash mantiqi
+        const filtered = status === 'ALL' ? allUserTrips : allUserTrips.filter(t => t.tripStatus === status);
+        renderTripsList(filtered);
+    }
+
+    function renderTripsList(trips) {
+        const container = document.getElementById('dynamicListContainer');
+
+        if (!trips || trips.length === 0) {
+            container.innerHTML = `<div style="padding: 50px; text-align: center; color: #94a3b8; font-family: sans-serif;">Ushbu turdagi reyslar topilmadi.</div>`;
+            return;
+        }
+
+        container.innerHTML = trips.map(trip => {
+            const isComp = trip.tripStatus === 'COMPLETED';
+            const statusText = isComp ? 'TUGALLANGAN' : 'JARAYONDA';
+            const color = isComp ? '#10b981' : '#3b82f6';
+            const totalIncome = (trip.incomeOutUsd || 0) + (trip.incomeBackUsd || 0);
+
+            return `
+        <div style="background: white; border-radius: 15px; padding: 20px; margin-bottom: 12px; border: 1px solid #f1f5f9; border-left: 5px solid ${color}; display: flex; justify-content: space-between; align-items: center; font-family: sans-serif;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                    <span style="font-size: 11px; font-weight: 800; color: #cbd5e1;">#${trip.id}</span>
+                    <span style="font-weight: 700; color: #1e293b; font-size: 15px;">${trip.routeFrom} ➔ ${trip.routeTo}</span>
+                    <span style="font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 20px; background: ${isComp ? '#f0fdf4' : '#eff6ff'}; color: ${color};">
+                        ${statusText}
+                    </span>
+                </div>
+                <div style="display: flex; gap: 15px; font-size: 12px; color: #64748b;">
+                    <span>🚛 <b>${trip.truckNumber}</b></span>
+                    <span>⏱ ${trip.tripDuration} kun</span>
+                    <span>📦 <b style="color: #10b981;">$${trip.incomeOutUsd} / $${trip.incomeBackUsd}</b></span>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Jami Daromad</div>
+                <div style="font-size: 20px; font-weight: 900; color: #1e293b;">$${totalIncome.toLocaleString()}</div>
+            </div>
+        </div>
+        `;
+        }).join('');
+    }
+
+    function getStatusStyle(status) {
+        switch (status) {
+            case 'COMPLETED':
+                return { color: '#10b981', bgClass: 'bg-green-50', textClass: 'text-green-600' };
+            case 'IN_PROGRESS':
+                return { color: '#3b82f6', bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
+            default:
+                return { color: '#f59e0b', bgClass: 'bg-yellow-50', textClass: 'text-yellow-600' };
+        }
+    }
     // OYLIK VA MOLIYAVIY MA'LUMOTLARNI KO'RSATISH
-    async function toggleFinanceView(userId) {
-        document.getElementById('reportDownloadContainer').classList.remove('hidden');
+    // 1. Dastlab ma'lumotni saqlash uchun o'zgaruvchi
+    let currentFinanceData = [];
+
+    async function toggleFinanceView(userId, filterType = 'ALL') {
         const container = document.getElementById('dynamicListContainer');
         const title = document.getElementById('dynamicTitle');
-        title.innerText = "Oylik, Bonus va Avanslar";
-        container.innerHTML = `<div style="padding: 20px; text-align: center; color: #64748b;">Yuklanmoqda...</div>`;
+        const buttonsContainer = document.getElementById('actionButtonsContainer');
+        const itemsSelect = document.getElementById('itemsPerPage');
+
+        // 1. Yashirilgan elementlarni qayta ko'rsatish
+        if (itemsSelect) {
+            itemsSelect.style.display = 'block'; // Paginationni ko'rsatish
+        }
+
+        // 2. Reys filtrlari o'rniga Moliya tugmalarini qaytarish
+        if (buttonsContainer) {
+            buttonsContainer.innerHTML = `
+            <button onclick="toggleFinanceView(${userId}, 'INCOME')" style="padding: 10px 15px; border-radius: 10px; border: 1px solid #10b981; background: #f0fdf4; color: #166534; font-weight: 600; cursor: pointer; transition: 0.2s;">➕ Kirimlar</button>
+            <button onclick="toggleFinanceView(${userId}, 'EXPENSE')" style="padding: 10px 15px; border-radius: 10px; border: 1px solid #ef4444; background: #fff1f2; color: #991b1b; font-weight: 600; cursor: pointer; transition: 0.2s;">➖ Chiqimlar</button>
+            <div style="position: relative;">
+                <button onclick="document.getElementById('reportDropdown').classList.toggle('hidden')" style="padding: 10px 15px; background: white; border: 1px solid #e2e8f0; border-radius: 10px; color: #1e293b; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                    📊 Hisobot ▾
+                </button>
+                <div id="reportDropdown" class="hidden" style="position: absolute; top: 45px; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000; min-width: 150px;">
+                    <div onclick="downloadFinanceReport(${userId}, 'pdf')" style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9;">PDF yuklash</div>
+                    <div onclick="downloadFinanceReport(${userId}, 'excel')" style="padding: 12px 15px; cursor: pointer;">Excel yuklash</div>
+                </div>
+            </div>
+        `;
+        }
+
+        // Sarlavhani tanlangan filtrga qarab o'zgartiramiz
+        const titles = {
+            'ALL': 'Moliya Tarixi',
+            'INCOME': 'Kirimlar Tarixi',
+            'EXPENSE': 'Chiqimlar Tarixi'
+        };
+        title.innerText = titles[filterType] || titles['ALL'];
+
+        container.innerHTML = `<div style="padding: 30px; text-align: center; color: #64748b;">Yuklanmoqda...</div>`;
 
         try {
             const response = await fetch(`${API_BASE}/user-balance/view-list/${userId}`, {
@@ -2005,53 +2163,162 @@
             const result = await response.json();
 
             if (!result.success || !result.object || result.object.length === 0) {
-                container.innerHTML = `<div style="padding: 20px; text-align: center; color: #94a3b8;">Ma'lumotlar topilmadi.</div>`;
+                container.innerHTML = `<div style="padding: 40px; text-align: center; color: #94a3b8; background: #f8fafc; border-radius: 12px; margin-top: 10px;">Ma'lumotlar topilmadi.</div>`;
                 return;
             }
 
-            container.innerHTML = result.object.map(item => {
-                // Turiga qarab rang va matnni aniqlash
-                const config = {
-                    'SALARY': {label: 'Oylik', color: '#3b82f6'},
-                    'BONUS': {label: 'Bonus', color: '#10b981'},
-                    'ADVANCE': {label: 'Avans', color: '#f97316'},
-                    'PERSONAL': {label: 'Shaxsiy', color: '#8b5cf6'},
-                    'PENALTY': {label: 'Jarima', color: '#ef4444'}
-                }[item.paymentType] || {label: item.paymentType, color: '#64748b'};
+            let data = result.object;
+            if (filterType === 'INCOME') {
+                data = data.filter(i => ['SALARY', 'BONUS'].includes(i.paymentType));
+            } else if (filterType === 'EXPENSE') {
+                data = data.filter(i => ['ADVANCE', 'PENALTY', 'PERSONAL'].includes(i.paymentType));
+            }
 
-                return `
-            <div style="background: white; border-radius: 12px; padding: 16px; border-left: 6px solid ${config.color}; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                <div style="border-left: 5px solid ${config.color}; padding-left: 15px;">
-                    <div style="font-weight: 700; color: #1e293b; font-size: 16px;">${config.label}</div>
-                    <div style="font-size: 13px; color: #64748b; margin-top: 2px;">
-                        📅 ${item.operationDate || 'Sana ko\'rsatilmagan'}
-                    </div>
-                    <div style="font-size: 14px; color: #475569; margin-top: 6px; font-style: italic;">
-                        💬 ${item.description || 'Izoh yo\'q'}
-                    </div>
+            currentFinanceData = data;
+            updateFinanceDisplay(userId);
+
+        } catch (e) {
+            container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Ma'lumotni yuklashda xatolik yuz berdi.</div>`;
+        }
+    }
+
+    function updateFinanceDisplay(userId) {
+        const container = document.getElementById('dynamicListContainer');
+        const limitElement = document.getElementById('itemsPerPage');
+        const limit = limitElement ? limitElement.value : '5';
+
+        const displayData = limit === 'all' ? currentFinanceData : currentFinanceData.slice(0, parseInt(limit));
+
+        if (displayData.length === 0) {
+            container.innerHTML = `<div style="padding: 40px; text-align: center; color: #94a3b8;">Ma'lumotlar topilmadi.</div>`;
+            return;
+        }
+
+        container.innerHTML = displayData.map(item => {
+            const config = {
+                'SALARY': {label: 'Oylik', color: '#3b82f6', icon: '💰'},
+                'BONUS': {label: 'Bonus', color: '#10b981', icon: '🎁'},
+                'ADVANCE': {label: 'Avans', color: '#f97316', icon: '💸'},
+                'PERSONAL': {label: 'Shaxsiy', color: '#8b5cf6', icon: '👤'},
+                'PENALTY': {label: 'Jarima', color: '#ef4444', icon: '⚠️'}
+            }[item.paymentType] || {label: item.paymentType, color: '#64748b', icon: '📄'};
+
+            const isAlwaysPaid = ['PERSONAL', 'PENALTY', 'ADVANCE'].includes(item.paymentType);
+            const isPaid = isAlwaysPaid || item.paid === true || item.isPaid === true;
+
+            const statusHtml = isPaid
+                ? `<span style="font-size: 11px; color: #10b981; background: #f0fdf4; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-left: 8px;">✅ To'langan</span>`
+                : `<span style="font-size: 11px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-weight: 600; margin-left: 8px;">⏳ Kutilmoqda</span>`;
+
+            const tripHtml = (item.tripId && item.tripId !== 0)
+                ? `<span style="font-size: 12px; color: #3b82f6; background: #eff6ff; padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-left: 10px;">🚚 Reys #${item.tripId}</span>`
+                : '';
+
+            return `
+        <div style="background: white; border-radius: 12px; padding: 18px; border: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 48px; height: 48px; background: ${config.color}15; color: ${config.color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px;">
+                    ${config.icon}
                 </div>
-
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="text-align: right;">
-                        <div style="font-size: 18px; font-weight: 800; color: #1e293b;">
-                            $${item.amountUsd.toLocaleString()}
-                        </div>
-                        <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">USD</span>
+                <div>
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                        <span style="font-weight: 700; color: #1e293b; font-size: 16px;">${config.label}</span>
+                        ${statusHtml}
                     </div>
-
-                    <button onclick='openSalaryModal(${userId}, ${item.tripId || 'null'}, ${JSON.stringify(item)})'
-                            style="background: #f1f5f9; border: none; padding: 10px; border-radius: 10px; cursor: pointer; transition: 0.2s;"
-                            onmouseover="this.style.background='#e2e8f0'"
-                            onmouseout="this.style.background='#f1f5f9'">
-                        ✏️
-                    </button>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px; display: flex; align-items: center;">
+                        📅 ${item.operationDate || '-'} ${tripHtml}
+                    </div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 4px; max-width: 400px;">${item.description || 'Izoh yo\'q'}</div>
                 </div>
             </div>
-            `;
-            }).join('');
-        } catch (e) {
-            container.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Xatolik yuz berdi!</div>`;
-        }
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="text-align: right; margin-right: 10px;">
+                    <div style="font-size: 19px; font-weight: 800; color: #1e293b;">$${(item.amountUsd || 0).toLocaleString()}</div>
+                    <div style="font-size: 10px; color: #94a3b8; font-weight: 700;">USD</div>
+                </div>
+                <button onclick='openSalaryModal(${userId}, null, ${JSON.stringify(item)})' style="background: #f8fafc; border: 1px solid #e2e8f0; width: 36px; height: 36px; border-radius: 8px; cursor: pointer;">✏️</button>
+                <button onclick='deleteFinanceItem(${item.id}, ${userId})' style="background: #fff1f2; border: 1px solid #fecaca; width: 36px; height: 36px; border-radius: 8px; cursor: pointer;">🗑️</button>
+            </div>
+        </div>`;
+        }).join('');
+    }
+
+    // O'chirish funksiyasi namunasi
+    async function deleteFinanceItem(id, userId) {
+        Swal.fire({
+            title: 'Ishonchingiz komilmi?',
+            text: "Ushbu moliya yozuvini o'chirishni tasdiqlaysizmi? Uni qayta tiklab bo'lmasligi mumkin!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444', // O'chirish bo'lgani uchun qizilroq rang
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Ha, o‘chirilsin!',
+            cancelButtonText: 'Bekor qilish'
+        }).then(async (result) => {
+
+            if (!result.isConfirmed) return;
+
+            let response;
+
+            // 🔹 1. Tarmoq so'rovi (Fetch)
+            try {
+                response = await fetch(`${API_BASE}/user-balance/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (networkError) {
+                console.error("NETWORK ERROR:", networkError);
+                showNotify("Tarmoq xatosi!", "Server bilan aloqa uzildi.", 'error');
+                return;
+            }
+
+            // 🔹 2. HTTP statusni tekshirish
+            if (!response.ok) {
+                showNotify(
+                    "Xatolik!",
+                    `Serverda xatolik yuz berdi: ${response.status}`,
+                    'error'
+                );
+                return;
+            }
+
+            // 🔹 3. JSON parsing (Xavfsiz usulda)
+            let data;
+            try {
+                const text = await response.text();
+                data = text ? JSON.parse(text) : { success: true };
+            } catch (jsonError) {
+                console.warn("JSON parse xatosi:", jsonError);
+                data = { success: true }; // Agar bo'sh qaytsa, muvaffaqiyatli deb hisoblaymiz
+            }
+
+            // 🔹 4. Biznes mantiq (data.success)
+            if (data.success) {
+                showNotify(
+                    "O'chirildi!",
+                    data.message || "Moliya yozuvi muvaffaqiyatli o'chirildi.",
+                    'success'
+                );
+
+                // 🔹 5. UI ni yangilash
+                try {
+                    // Ro'yxatni qayta yuklash
+                    toggleFinanceView(userId);
+                } catch (uiError) {
+                    console.error("UI yangilashda xatolik:", uiError);
+                }
+
+            } else {
+                showNotify(
+                    "Xatolik!",
+                    data.message || "O'chirish imkoni bo'lmadi.",
+                    'error'
+                );
+            }
+        });
     }
 
     // HISOBOT YUKLASH FUNKSIYASI (AXLOQIY)
