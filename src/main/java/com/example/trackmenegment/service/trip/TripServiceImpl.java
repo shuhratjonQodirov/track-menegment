@@ -139,13 +139,22 @@ public class TripServiceImpl implements TripService {
             trip.setUser(user);
         }
 
-        if (tripReqDto.getStartedDate() != null && tripReqDto.getFinishedDate() != null) {
-            if (tripReqDto.getFinishedDate().isBefore(tripReqDto.getStartedDate())) {
-                throw new ByIdException("Tugash sanasi boshlanish sanasidan oldin bo'lishi mumkin emas");
-            }
+        if (tripReqDto.getStartedDate() != null) {
             trip.setStartedDate(tripReqDto.getStartedDate());
-            trip.setFinishedDate(tripReqDto.getFinishedDate());
+
+            LocalDate endDateForCalculation;
+
+            if (tripReqDto.getFinishedDate() != null) {
+                endDateForCalculation = tripReqDto.getFinishedDate();
+                trip.setFinishedDate(endDateForCalculation);
+            } else {
+                endDateForCalculation = LocalDate.now();
+                trip.setFinishedDate(null);
+            }
+            long days = ChronoUnit.DAYS.between(tripReqDto.getStartedDate(), endDateForCalculation);
+            trip.setTripDuration((int) days);
         }
+
 
         if (tripReqDto.getTripDuration() >= 0) {
             trip.setTripDuration(tripReqDto.getTripDuration());

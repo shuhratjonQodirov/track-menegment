@@ -2938,7 +2938,6 @@
         const nextStatus = (currentStatus === 'COMPLETED') ? 'IN_PROGRESS' : 'COMPLETED';
         const isFinishing = nextStatus === 'COMPLETED';
 
-        // SweetAlert Tasdiqlash oynasi
         const result = await Swal.fire({
             title: isFinishing ? "Xarajatlarni tasdiqlash" : "Tahrirlashni ochish",
             text: isFinishing
@@ -2960,7 +2959,7 @@
 
         if (result.isConfirmed) {
             try {
-                // 1. Joriy tripni GET qilish
+                // 1. Joriy trip ma'lumotlarini olish
                 const getRes = await fetch(`${API_BASE}/trip/${tripId}`, {
                     headers: {'Authorization': `Bearer ${authToken}`}
                 });
@@ -2969,7 +2968,19 @@
                 if (!getData.success) throw new Error("Ma'lumot topilmadi");
 
                 const tripData = getData.object;
-                tripData.tripStatus = nextStatus; // Faqat statusni yangilaymiz
+
+                // STATUSNI O'ZGARTIRISH
+                tripData.tripStatus = nextStatus;
+
+                // SANANI O'ZLASHTIRISH
+                if (isFinishing) {
+                    // Bugungi sanani ISO formatda (YYYY-MM-DD) berish
+                    // Agar vaqt ham kerak bo'lsa: new Date().toISOString()
+                    tripData.finishedDate = new Date().toISOString().split('T')[0];
+                } else {
+                    // Agar reys qaytadan ochilsa, tugash sanasini tozalash kerak bo'lishi mumkin
+                    tripData.finishedDate = null;
+                }
 
                 // 2. Yangilangan ob'ektni PUT qilish
                 const response = await fetch(`${API_BASE}/trip/${tripId}`, {
@@ -2984,7 +2995,9 @@
                 const resData = await response.json();
 
                 if (resData.success) {
-                    showTripDetails(tripId); // UI ni yangilash
+                    // UI ni yangilash (Eski funksiyangiz)
+                    if (typeof showTripDetails === "function") showTripDetails(tripId);
+
                     showNotify(
                         "Muvaffaqiyatli",
                         isFinishing ? "Xarajatlar tasdiqlandi va reys yakunlandi" : "Reys tahrirlash uchun ochildi",
@@ -2994,7 +3007,7 @@
                     showNotify("Xatolik", resData.message || "Xatolik yuz berdi", "error");
                 }
             } catch (error) {
-                console.error(error);
+                console.error("Update Error:", error);
                 showNotify("Xatolik", "Server bilan bog'lanishda xatolik", "error");
             }
         }

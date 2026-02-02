@@ -5,7 +5,6 @@ import com.example.trackmenegment.model.Trip;
 import com.example.trackmenegment.model.User;
 import com.example.trackmenegment.utils.ApiResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
 
