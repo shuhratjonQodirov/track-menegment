@@ -20,4 +20,6 @@ public interface UserBalanceService {
     ApiResponse totalBalance(Long userId);
 
     ApiResponse update(Long userId, UserBalanceReqDto dto);
+
+    byte[] getPdfUserBalance(Long userId);
 }

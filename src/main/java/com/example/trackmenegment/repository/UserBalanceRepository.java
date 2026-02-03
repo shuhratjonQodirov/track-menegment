@@ -17,6 +17,7 @@ public interface UserBalanceRepository extends JpaRepository<UserBalance, Long> 
     List<UserBalance> findAllByTripAndDeletedFalse(Trip trip);
 
     List<UserBalance> findAllByUserAndDeletedFalseOrderByCreatedAtAsc(User user);
+    List<UserBalance> findAllByUserAndDeletedFalse(User user);
 
     Optional<UserBalance> findByIdAndDeletedFalse(Long id);
 

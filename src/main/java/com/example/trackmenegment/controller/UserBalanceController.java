@@ -5,7 +5,10 @@ import com.example.trackmenegment.service.UserBalanceService;
 import com.example.trackmenegment.utils.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +41,18 @@ public class UserBalanceController {
     public HttpEntity<?> update(@RequestBody @Valid UserBalanceReqDto dto, @PathVariable Long userBalanceId) {
         ApiResponse response = userBalanceService.update(userBalanceId, dto);
         return ResponseEntity.ok(response);
+    }
 
+    @GetMapping(value = "/get-report-pdf/{userId}", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> getPdfUserBalance(@PathVariable Long userId) {
+        byte[] response = userBalanceService.getPdfUserBalance(userId);
+
+        String fileName = "Balans_Hisoboti_ID_" + userId + ".pdf";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(response.length)
+                .body(response);
     }
 }
