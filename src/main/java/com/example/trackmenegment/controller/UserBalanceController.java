@@ -46,9 +46,7 @@ public class UserBalanceController {
     @GetMapping(value = "/get-report-pdf/{userId}", produces = MediaType.APPLICATION_PDF_VALUE)
     public ResponseEntity<byte[]> getPdfUserBalance(@PathVariable Long userId) {
         byte[] response = userBalanceService.getPdfUserBalance(userId);
-
         String fileName = "Balans_Hisoboti_ID_" + userId + ".pdf";
-
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
                 .contentType(MediaType.APPLICATION_PDF)

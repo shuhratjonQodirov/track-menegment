@@ -31,11 +31,8 @@ public class TruckServiceImpl implements TruckService {
         if (truckRepository.existsByTruckNumberAndDeletedFalse(truckReqDto.getTruckNumber().toUpperCase())) {
             throw new ExistsNameException("This truck number already exists");
         }
-
         Truck truck = truckMapper.toEntity(truckReqDto);
-
         truckRepository.save(truck);
-
         return new ApiResponse("truck  data saved successfully", true);
     }
     @Override
@@ -80,16 +77,15 @@ public class TruckServiceImpl implements TruckService {
     @Override
     public ApiResponse getById(Long id) {
         Truck truck = truckRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ByIdException("Truck not found"));
+
         return new ApiResponse("Truck by id", true, truckMapper.toDto(truck));
     }
 
     @Override
     public ApiResponse delete(Long id) {
-
         Truck truck = truckRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new ByIdException("Truck not found"));
         truck.setDeleted(true);
         truckRepository.save(truck);
         return new ApiResponse("Truck successfully deleted", true);
-
     }
 }

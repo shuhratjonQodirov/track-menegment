@@ -45,4 +45,5 @@ public class TruckController {
         return ResponseEntity.ok(response);
     }
 
+
 }

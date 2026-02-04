@@ -362,7 +362,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
                 .setFontSize(14)
                 .setMarginBottom(12);
         document.add(breakdownTitle);
-
         // Calculate by type
         BigDecimal salary = calculateByType(balances, PaymentType.SALARY);
         BigDecimal bonus = calculateByType(balances, PaymentType.BONUS);
@@ -429,7 +428,7 @@ public class UserBalanceServiceImpl implements UserBalanceService {
                 .useAllAvailableWidth()
                 .setBackgroundColor(ColorConstants.WHITE);
 
-        // Modern headers
+
         table.addHeaderCell(createModernHeaderCell("№", boldFont));
         table.addHeaderCell(createModernHeaderCell("Sana", boldFont));
         table.addHeaderCell(createModernHeaderCell("Tavsif", boldFont));
@@ -437,7 +436,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
         table.addHeaderCell(createModernHeaderCell("Summa", boldFont));
         table.addHeaderCell(createModernHeaderCell("Holat", boldFont));
 
-        // Data rows with alternating colors
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         int index = 1;
         for (UserBalance balance : balances) {
@@ -450,13 +448,11 @@ public class UserBalanceServiceImpl implements UserBalanceService {
             table.addCell(createModernDataCell(
                     balance.getDescription() != null ? balance.getDescription() : "-",
                     regularFont, rowBg));
-
             // Type cell with icon
             String typeIcon = getPaymentTypeIcon(balance.getPaymentType());
             String typeText = typeIcon + " " + getPaymentTypeInUzbek(balance.getPaymentType());
             table.addCell(createModernDataCell(typeText, regularFont, rowBg));
 
-            // Amount cell with color coding
             DeviceRgb amountColor = isIncome(balance.getPaymentType()) ? SUCCESS_COLOR : DANGER_COLOR;
             String amountText = "$" + formatMoney(balance.getAmountUsd());
             Cell amountCell = createModernDataCell(amountText, boldFont, rowBg)
@@ -491,7 +487,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
     }
 
     private void addModernFooter(Document document, PdfFont regularFont, Long userId) throws Exception {
-        // Add some space
         document.add(new Paragraph("\n"));
 
         // Footer with separator
@@ -500,10 +495,8 @@ public class UserBalanceServiceImpl implements UserBalanceService {
         separator.setMarginBottom(15);
         document.add(separator);
 
-        // Footer with QR code
         Table footerTable = new Table(new float[]{3, 1}).useAllAvailableWidth();
 
-        // Left side - text info
         Cell leftCell = new Cell();
         leftCell.setBorder(Border.NO_BORDER);
 
@@ -513,7 +506,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
                 .setFontColor(TEXT_GRAY)
                 .setMarginBottom(3);
 
-        // LocalDate emas, LocalDateTime ishlating
         Paragraph dateFooter = new Paragraph("Sana: " +
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")))
                 .setFont(regularFont)
@@ -531,7 +523,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
         leftCell.add(dateFooter);
         leftCell.add(urlFooter);
 
-        // Right side - QR code
         Cell rightCell = new Cell();
         rightCell.setBorder(Border.NO_BORDER);
         rightCell.setTextAlignment(TextAlignment.RIGHT);
@@ -543,8 +534,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
             Image qrImage = new Image(ImageDataFactory.create(qrCodeBytes));
             qrImage.setWidth(80);
             qrImage.setHeight(80);
-
-            // QR code with border
             Table qrTable = new Table(1);
             qrTable.setBorder(new SolidBorder(BORDER_COLOR, 2));
             qrTable.setBackgroundColor(ColorConstants.WHITE);
@@ -567,7 +556,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
 
             rightCell.add(qrTable);
         } catch (Exception e) {
-            // If QR generation fails, add text link
             Paragraph linkText = new Paragraph("QR kod yaratilmadi")
                     .setFont(regularFont)
                     .setFontSize(8)
@@ -581,7 +569,6 @@ public class UserBalanceServiceImpl implements UserBalanceService {
         document.add(footerTable);
     }
 
-    // Helper methods
     private BigDecimal calculateIncome(List<UserBalance> balances) {
         return balances.stream()
                 .filter(b -> b.getPaymentType() == PaymentType.SALARY ||

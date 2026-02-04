@@ -29,7 +29,28 @@
                 transform: rotate(360deg);
             }
         }
+        .modal {
+            display: none; /* Default holatda yopiq */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); /* Orqa fonni xiralashtirish */
+            z-index: 9999;
+            align-items: center; /* Vertikal markazlash */
+            justify-content: center; /* Gorizontal markazlash */
+        }
 
+        /* Modal ochilganda ushbu klass qo'shiladi */
+        .modal.show {
+            display: flex !important;
+        }
+
+        /* Tailwind-ning hidden klassi bilan to'qnashuvni oldini olish uchun */
+        .hidden {
+            display: none !important;
+        }
         .modal {
             display: none;
             position: fixed;
@@ -1137,12 +1158,21 @@
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
+
+        // Ma'lumot turlarini to'g'rilaymiz
         data.buyPrice = parseFloat(data.buyPrice);
         data.manufactureYear = parseInt(data.manufactureYear);
 
+        // Dinamik URL va Method tanlash
+        const url = editingTruckId
+            ? `${API_BASE}/truck/update/${editingTruckId}`
+            : `${API_BASE}/truck/create`;
+
+        const method = editingTruckId ? 'PUT' : 'POST';
+
         try {
-            const response = await fetch(`${API_BASE}/truck/create`, {
-                method: 'POST',
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authToken}`
@@ -1151,15 +1181,14 @@
             });
 
             if (response.ok) {
-                showNotify("Muvaffaqiyatli !", 'Mashina muvaffaqiyatli qo\'shildi!');
-                closeAddTruckModal();
-                loadTrucks();
+                showNotify("Muvaffaqiyatli!", editingTruckId ? "Ma'lumotlar yangilandi" : "Mashina qo'shildi");
+                closeAddTruckModal(); // Modalni yopish va tozalash
+                loadTrucks(); // Ro'yxatni yangilash
             } else {
-                showNotify("Kutilmagan xatolik", 'Xatolik yuz berdi!');
+                showNotify("Xatolik", "Amalni bajarib bo'lmadi");
             }
         } catch (error) {
-            console.error('Error creating truck:', error);
-            showNotify("Kutilmagan xatolik", 'Xatolik yuz berdi!');
+            showNotify("Xatolik", "Server bilan aloqa uzildi");
         }
     });
 
@@ -1627,7 +1656,24 @@
 
     // Truck Modal Functions
     function openAddTruckModal() {
-        document.getElementById('addTruckModal').classList.add('active');
+        editingTruckId = null; // Tahrirlash rejimidan chiqish
+        const modal = document.getElementById('addTruckModal');
+        const form = document.getElementById('addTruckForm');
+
+        if (!modal) {
+            console.error("Modal topilmadi! IDni tekshiring.");
+            return;
+        }
+
+        form.reset(); // Formani tozalash
+        document.querySelector('#addTruckModal h3').innerText = "Yangi mashina qo'shish";
+
+        // MUHIM: Har ikkala klassni ham boshqaramiz
+        modal.classList.remove('hidden');
+        modal.classList.add('show');
+
+        // Agar CSS-da hali ham muammo bo'lsa, majburiy inline style beramiz
+        modal.style.display = 'flex';
     }
 
 
@@ -1775,10 +1821,210 @@
         isEditMode = false;
     }
 
+    let editingTruckId = null; // Tahrirlanayotgan mashina ID sini saqlash uchun
+
+    async function editTruck(id) {
+        try {
+            const response = await fetch(`${API_BASE}/truck/${id}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+
+            if (!response.ok) throw new Error("Serverdan ma'lumot olishda xatolik!");
+
+            const res = await response.json(); // Kelgan JSON (message, object, success)
+
+            if (res.success && res.object) {
+                const truck = res.object; // Ma'lumot aynan 'object' ichida
+                editingTruckId = id; // Tahrirlanayotgan ID ni saqlab qo'yamiz
+
+                const form = document.getElementById('addTruckForm');
+
+                // Modal sarlavhasini o'zgartirish
+                document.querySelector('#addTruckModal h3').innerText = "Mashina ma'lumotlarini tahrirlash";
+
+                // Formani to'ldirish
+                form.truckNumber.value = truck.truckNumber || '';
+                form.modelName.value = truck.modelName || '';
+                form.manufactureYear.value = truck.manufactureYear || '';
+                form.buyPrice.value = truck.buyPrice || '';
+                form.buyDate.value = truck.buyDate || ''; // "2021-05-14" formatida bo'lsa, date input buni taniydi
+                form.truckStatus.value = truck.truckStatus || 'ACTIVE';
+
+                // Modalni ochish (Tailwind modal uchun)
+                document.getElementById('addTruckModal').classList.add('show');
+                document.getElementById('addTruckModal').style.display = 'flex';
+            } else {
+                showNotify("Xatolik", "Mashina topilmadi!");
+            }
+
+        } catch (error) {
+            console.error("Edit xatosi:", error);
+            showNotify("Xatolik", "Ma'lumotlarni yuklab bo'lmadi.");
+        }
+    }
+
 
     function closeAddTruckModal() {
-        document.getElementById('addTruckModal').classList.remove('active');
-        document.getElementById('addTruckForm').reset();
+        const modal = document.getElementById('addTruckModal');
+        const form = document.getElementById('addTruckForm');
+
+        editingTruckId = null;
+        form.reset();
+
+        document.querySelector('#addTruckModal h3').innerText = "Yangi mashina qo'shish";
+
+        // 4. Modalni yashirish
+        // Agar CSS-da .modal { display: none } bo'lsa:
+        modal.style.display = 'none';
+
+        // Agar Tailwind 'hidden' klassini ishlatsangiz:
+        modal.classList.add('hidden');
+        modal.classList.remove('flex', 'show'); // Ochishda qo'shilgan klasslarni olib tashlaymiz
+    }
+
+    // Modaldan tashqariga (kulrang fonga) bosilganda yopish mantiqi
+    window.onclick = function(event) {
+        const modal = document.getElementById('addTruckModal');
+        if (event.target === modal) {
+            closeAddTruckModal();
+        }
+    }
+
+    async function viewTruck(id) {
+        try {
+            const response = await fetch(`${API_BASE}/truck/${id}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const res = await response.json();
+
+            const container = document.getElementById('trucks-tab');
+            if (!container) return;
+
+            if (res.success && res.object) {
+                const truck = res.object;
+
+                // w-full max-w-none klasslari orqali kenglikni ochamiz
+                container.innerHTML = `
+                <div class="w-full min-h-screen bg-gray-50 p-4 md:p-8">
+                    <div class="w-full max-w-none mx-auto">
+
+                     <div class="mb-6">
+        <button onclick="backToTruckList()" class="px-6 py-2 bg-white border rounded-lg hover:bg-gray-100 shadow-sm transition">
+            ← Ortga qaytish
+        </button>
+    </div>
+
+                        <div class="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 mb-8">
+                            <div class="flex justify-between items-center mb-8 border-b pb-6">
+                                <h2 class="text-3xl font-extrabold text-blue-800">Mashina Ma'lumotlari</h2>
+                                <button onclick="editTruck(${truck.id})" class="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 flex items-center gap-2 shadow-lg transition-transform active:scale-95">
+                                    <span>✏️</span> Tahrirlash
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-12">
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Model</p>
+                                    <p class="text-xl font-bold text-gray-900">${truck.modelName}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Davlat raqami</p>
+                                    <p class="text-xl font-bold text-gray-900">${truck.truckNumber}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Ishlab chiqarilgan yili</p>
+                                    <p class="text-xl font-bold text-gray-900">${truck.manufactureYear}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Sotib olingan narxi</p>
+                                    <p class="text-xl font-bold text-gray-900 text-blue-600">$ ${truck.buyPrice.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Holati</p>
+                                    <span class="inline-flex px-4 py-1 rounded-full text-sm font-black uppercase ${truck.truckStatus === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                                        ● ${truck.truckStatus}
+                                    </span>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Sotib olingan sana</p>
+                                    <p class="text-xl font-bold text-gray-900">${truck.buyDate}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+
+                        <div class="bg-white rounded-2xl shadow-sm border-l-8 border-blue-500 p-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-4">
+                                <span class="p-2 bg-blue-50 rounded-lg">🚚</span> Reysdagi Xarajatlar
+                            </h3>
+
+                            <div id="tripExpensesList" class="h-[350px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                                <div class="p-4 text-center text-gray-400 italic">Ma'lumot topilmadi</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-sm border-l-8 border-amber-500 p-6">
+                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-4">
+                                <span class="p-2 bg-amber-50 rounded-lg">🔧</span> Garajdagi Xarajatlar
+                            </h3>
+
+                            <div id="garageExpensesList" class="h-[350px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                                <div class="p-4 text-center text-gray-400 italic">Ma'lumot topilmadi</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    </div>
+                    <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-6">Bu mashinada bajarilgan reyslar</h3>
+
+    <div id="completedTripsList" class="max-h-[500px] overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+        <div class="p-4 text-center text-gray-400 italic font-medium bg-gray-50 rounded-xl">
+            Hozircha bajarilgan reyslar mavjud emas
+        </div>
+    </div>
+</div>
+                </div>
+            `;
+            }
+        } catch (error) {
+            console.error("Xatolik:", error);
+        }
+    }
+
+    function backToTruckList() {
+        const tabContent = document.getElementById('trucks-tab');
+
+        // 1. Tabni asl holatiga (Qidiruv paneli va ro'yxat konteyneri bilan) qaytaramiz
+        tabContent.innerHTML = `
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <h2 class="text-2xl font-bold">Mashinalar</h2>
+
+                <div class="relative flex-1 max-w-md mx-4">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="truckSearchInput" onkeyup="searchTrucks()" placeholder="Mashina raqami bo'yicha qidiruv..."
+                           class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
+                </div>
+
+                <button onclick="openAddTruckModal()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition shadow-md">
+                    + Mashina qo'shish
+                </button>
+            </div>
+
+            <div id="trucksList" class="space-y-3">
+                </div>
+        </div>
+    `;
+
+        // 2. Mashinalar ro'yxatini qayta yuklovchi funksiyangizni chaqiring
+        loadTrucks();
     }
 
     async function loadTrucks() {
