@@ -9,4 +9,6 @@ public interface TruckExpenseService {
     ApiResponse delete(Long id);
 
     ApiResponse update(Long truckExpense, TruckExpenseReq truckExpenseReq);
+
+    ApiResponse getTruckExpense(Long truckId);
 }

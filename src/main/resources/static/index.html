@@ -29,6 +29,7 @@
                 transform: rotate(360deg);
             }
         }
+
         .modal {
             display: none; /* Default holatda yopiq */
             position: fixed;
@@ -51,6 +52,7 @@
         .hidden {
             display: none !important;
         }
+
         .modal {
             display: none;
             position: fixed;
@@ -356,19 +358,110 @@
     <!-- Settings Tab -->
     <div id="settings-tab" class="tab-content container mx-auto p-4 hidden">
         <style>
-            .settings-layout { display: grid; grid-template-columns: 280px 1fr; gap: 25px; }
-            .settings-sidebar { background: #f8fafc; border-radius: 12px; padding: 15px; height: fit-content; border: 1px solid #e2e8f0; }
-            .sidebar-item { padding: 12px 16px; margin-bottom: 6px; border-radius: 8px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; color: #475569; font-weight: 500; }
-            .sidebar-item:hover { background: #f1f5f9; }
-            .sidebar-item.active { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
-            .settings-content { background: white; border-radius: 12px; padding: 30px; border: 1px solid #e2e8f0; min-height: 600px; }
-            .settings-section { display: none; }
-            .settings-section.active { display: block; animation: fadeIn 0.3s ease; }
-            @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-            .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: #475569; font-size: 13px; }
-            .form-input { width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; transition: 0.2s; }
-            .btn-save { background: #2563eb; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 600; transition: 0.2s; border: none; cursor: pointer; }
-            @media (max-width: 992px) { .settings-layout { grid-template-columns: 1fr; } .settings-sidebar { display: flex; overflow-x: auto; gap: 10px; } }
+            .settings-layout {
+                display: grid;
+                grid-template-columns: 280px 1fr;
+                gap: 25px;
+            }
+
+            .settings-sidebar {
+                background: #f8fafc;
+                border-radius: 12px;
+                padding: 15px;
+                height: fit-content;
+                border: 1px solid #e2e8f0;
+            }
+
+            .sidebar-item {
+                padding: 12px 16px;
+                margin-bottom: 6px;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                color: #475569;
+                font-weight: 500;
+            }
+
+            .sidebar-item:hover {
+                background: #f1f5f9;
+            }
+
+            .sidebar-item.active {
+                background: #2563eb;
+                color: white;
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            }
+
+            .settings-content {
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                border: 1px solid #e2e8f0;
+                min-height: 600px;
+            }
+
+            .settings-section {
+                display: none;
+            }
+
+            .settings-section.active {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(5px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .form-label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #475569;
+                font-size: 13px;
+            }
+
+            .form-input {
+                width: 100%;
+                padding: 10px 14px;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: 0.2s;
+            }
+
+            .btn-save {
+                background: #2563eb;
+                color: white;
+                padding: 10px 24px;
+                border-radius: 8px;
+                font-weight: 600;
+                transition: 0.2s;
+                border: none;
+                cursor: pointer;
+            }
+
+            @media (max-width: 992px) {
+                .settings-layout {
+                    grid-template-columns: 1fr;
+                }
+
+                .settings-sidebar {
+                    display: flex;
+                    overflow-x: auto;
+                    gap: 10px;
+                }
+            }
         </style>
 
         <div class="settings-layout">
@@ -429,7 +522,9 @@
                     <h2 class="text-2xl font-bold mb-6 text-red-600">Ma'lumotlar</h2>
                     <div class="p-6 bg-red-50 rounded-xl border border-red-100">
                         <p class="text-red-800 mb-4">Barcha reyslar va moliyaviy ma'lumotlarni eksport qiling.</p>
-                        <button class="bg-white border border-red-200 text-red-600 px-4 py-2 rounded-lg font-bold">📥 Excel Eksport</button>
+                        <button class="bg-white border border-red-200 text-red-600 px-4 py-2 rounded-lg font-bold">📥
+                            Excel Eksport
+                        </button>
                     </div>
                 </section>
             </main>
@@ -1046,7 +1141,7 @@
         });
     };
     // Settings ichidagi sidebar almashtirish funksiyasi
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (e.target.classList.contains('sidebar-item')) {
             const sidebarItems = document.querySelectorAll('.sidebar-item');
             const sections = document.querySelectorAll('.settings-section');
@@ -1066,6 +1161,7 @@
         // Bu yerda API orqali profilni yangilash kodi bo'ladi
         showNotify("Muvaffaqiyatli", "Profil ma'lumotlari yangilandi", "success");
     }
+
     // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1163,6 +1259,7 @@
         data.buyPrice = parseFloat(data.buyPrice);
         data.manufactureYear = parseInt(data.manufactureYear);
 
+
         // Dinamik URL va Method tanlash
         const url = editingTruckId
             ? `${API_BASE}/truck/update/${editingTruckId}`
@@ -1181,9 +1278,13 @@
             });
 
             if (response.ok) {
-                showNotify("Muvaffaqiyatli!", editingTruckId ? "Ma'lumotlar yangilandi" : "Mashina qo'shildi");
-                closeAddTruckModal(); // Modalni yopish va tozalash
-                loadTrucks(); // Ro'yxatni yangilash
+                showNotify("Muvaffaqiyatli!", editingTruckId ? "Ma'lumotlar yangilandi" : "Mashina qo'shildi", "success");
+                closeAddTruckModal();
+                if (currentView === 'detail' && editingTruckId) {
+                    viewTruck(editingTruckId); // Agar ichkarida bo'lsak, ichkarini yangila
+                } else {
+                    loadTrucks(); // Ro'yxatda bo'lsak, ro'yxatni yangila
+                }
             } else {
                 showNotify("Xatolik", "Amalni bajarib bo'lmadi");
             }
@@ -1191,6 +1292,7 @@
             showNotify("Xatolik", "Server bilan aloqa uzildi");
         }
     });
+
 
     document.getElementById('addUserForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1826,7 +1928,7 @@
     async function editTruck(id) {
         try {
             const response = await fetch(`${API_BASE}/truck/${id}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
+                headers: {'Authorization': `Bearer ${authToken}`}
             });
 
             if (!response.ok) throw new Error("Serverdan ma'lumot olishda xatolik!");
@@ -1883,17 +1985,18 @@
     }
 
     // Modaldan tashqariga (kulrang fonga) bosilganda yopish mantiqi
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById('addTruckModal');
         if (event.target === modal) {
             closeAddTruckModal();
         }
     }
-
+    let currentView = 'list';
     async function viewTruck(id) {
+        currentView = 'detail';
         try {
             const response = await fetch(`${API_BASE}/truck/${id}`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
+                headers: {'Authorization': `Bearer ${authToken}`}
             });
             const res = await response.json();
 
@@ -1952,31 +2055,43 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                       <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
-                        <div class="bg-white rounded-2xl shadow-sm border-l-8 border-blue-500 p-6">
-                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-4">
-                                <span class="p-2 bg-blue-50 rounded-lg">🚚</span> Reysdagi Xarajatlar
-                            </h3>
+    <div class="bg-white rounded-[32px] shadow-sm border-l-8 border-blue-500 p-6 flex flex-col h-[500px]">
+        <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-4">
+            <span class="p-2 bg-blue-50 rounded-lg">🚚</span> Reysdagi Xarajatlar
+        </h3>
 
-                            <div id="tripExpensesList" class="h-[350px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                                <div class="p-4 text-center text-gray-400 italic">Ma'lumot topilmadi</div>
-                            </div>
-                        </div>
+        <div id="tripExpensesList" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            </div>
 
-                        <div class="bg-white rounded-2xl shadow-sm border-l-8 border-amber-500 p-6">
-                            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-4">
-                                <span class="p-2 bg-amber-50 rounded-lg">🔧</span> Garajdagi Xarajatlar
-                            </h3>
+        <div class="mt-4 pt-4 border-t-2 border-dashed border-gray-100 flex justify-between items-center">
+            <span class="text-gray-400 text-[11px] font-bold uppercase tracking-widest">Jami:</span>
+            <span id="tripTotalUsd" class="text-2xl font-black text-slate-800 tracking-tighter">$0.00</span>
+        </div>
+    </div>
 
-                            <div id="garageExpensesList" class="h-[350px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
-                                <div class="p-4 text-center text-gray-400 italic">Ma'lumot topilmadi</div>
-                            </div>
-                        </div>
+    <div class="bg-white rounded-[32px] shadow-sm border-l-8 border-amber-500 p-6 flex flex-col h-[500px]">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center gap-3">
+                <span class="p-2 bg-amber-50 rounded-lg">🔧</span> Garajdagi Xarajatlar
+            </h3>
+            <button onclick="addTruckExpense(null, ${truck.id})" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-xl text-[11px] font-bold transition-all shadow-md shadow-blue-100">
+                + QO'SHISH
+            </button>
+        </div>
 
-                    </div>
+        <div id="garageExpensesList" class="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            </div>
 
-                    </div>
+        <div class="mt-4 pt-4 border-t-2 border-dashed border-gray-100 flex justify-between items-center">
+            <span class="text-gray-400 text-[11px] font-bold uppercase tracking-widest">Jami:</span>
+            <span id="garageTotalUsd" class="text-2xl font-black text-slate-800 tracking-tighter">$0.00</span>
+        </div>
+    </div>
+
+</div>
+    </div>
                     <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
     <h3 class="text-xl font-bold text-gray-800 mb-6">Bu mashinada bajarilgan reyslar</h3>
 
@@ -1988,6 +2103,12 @@
 </div>
                 </div>
             `;
+                // 2. !!! MUHIM QISMI: HTML chizib bo'lingandan keyin xarajatlarni yuklaymiz
+                // truck.id - bu API dan kelgan mashina ID si
+                loadTruckExpenses(truck.id);
+
+                // Agar reyslar ro'yxati ham alohida API bo'lsa, uni ham shu yerda chaqirasiz
+                // loadCompletedTrips(truck.id);
             }
         } catch (error) {
             console.error("Xatolik:", error);
@@ -2100,6 +2221,7 @@
 
         document.getElementById('fuelModal').classList.remove('hidden');
     }
+
     // Formani yuborish
     document.getElementById('expenseForm').addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -2346,6 +2468,57 @@
     // REYSLARNI KO'RSATISH
     let allUserTrips = []; // Reyslarni vaqtincha saqlash uchun
 
+    async function loadTruckExpenses(truckId) {
+        try {
+            const response = await fetch(`${API_BASE}/truck-expense/expenses/${truckId}`, {
+                headers: {'Authorization': `Bearer ${authToken}`}
+            });
+            const data = await response.json();
+
+            if (data.success && data.object) {
+                const {list, totalAmountByTrip, totalAmountByGarage} = data.object;
+
+                // Reysdagi xarajatlar
+                const tripExpenses = list.filter(exp => exp.tripId !== null);
+                renderExpenseItems('tripExpensesList', tripExpenses);
+                document.getElementById('tripTotalUsd').textContent = `$${(totalAmountByTrip || 0).toFixed(2)}`;
+
+                // Garajdagi xarajatlar
+                const garageExpenses = list.filter(exp => exp.tripId === null);
+                renderExpenseItems('garageExpensesList', garageExpenses);
+                document.getElementById('garageTotalUsd').textContent = `$${(totalAmountByGarage || 0).toFixed(2)}`;
+            }
+        } catch (error) {
+            console.error("Xarajatlarni yuklashda xatolik:", error);
+        }
+    }
+
+    function renderExpenseItems(containerId, list) {
+        const container = document.getElementById(containerId);
+
+        if (list.length === 0) {
+            container.innerHTML = `<div class="p-8 text-center text-gray-400 italic">Ma'lumot topilmadi</div>`;
+            return;
+        }
+
+        container.innerHTML = list.map(exp => `
+        <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl group hover:bg-white border border-transparent hover:border-blue-100 transition-all shadow-sm mb-3">
+            <div class="flex flex-col">
+                <span class="font-bold text-slate-700 text-[13px] uppercase">${exp.truckExpenseType.replace('_', ' ')}</span>
+                <span class="text-[11px] text-gray-400 mt-1">${exp.expenseDate} • ${exp.description || ''}</span>
+            </div>
+            <div class="text-right flex items-center gap-3">
+                <span class="font-bold text-red-600 text-[14px]">$${exp.amountUsd.toFixed(2)}</span>
+                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onclick="editTruckExpense(${exp.id})" class="p-1 hover:bg-blue-50 rounded">✏️</button>
+                    <button onclick="deleteTruckExpense(${exp.id})" class="p-1 hover:bg-red-50 rounded text-red-500">🗑️</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    }
+
+
     async function showTripsView(userId) {
         const title = document.getElementById('dynamicTitle');
         const container = document.getElementById('dynamicListContainer');
@@ -2441,13 +2614,14 @@
     function getStatusStyle(status) {
         switch (status) {
             case 'COMPLETED':
-                return { color: '#10b981', bgClass: 'bg-green-50', textClass: 'text-green-600' };
+                return {color: '#10b981', bgClass: 'bg-green-50', textClass: 'text-green-600'};
             case 'IN_PROGRESS':
-                return { color: '#3b82f6', bgClass: 'bg-blue-50', textClass: 'text-blue-600' };
+                return {color: '#3b82f6', bgClass: 'bg-blue-50', textClass: 'text-blue-600'};
             default:
-                return { color: '#f59e0b', bgClass: 'bg-yellow-50', textClass: 'text-yellow-600' };
+                return {color: '#f59e0b', bgClass: 'bg-yellow-50', textClass: 'text-yellow-600'};
         }
     }
+
     // OYLIK VA MOLIYAVIY MA'LUMOTLARNI KO'RSATISH
     // 1. Dastlab ma'lumotni saqlash uchun o'zgaruvchi
     let currentFinanceData = [];
@@ -2623,10 +2797,10 @@
             let data;
             try {
                 const text = await response.text();
-                data = text ? JSON.parse(text) : { success: true };
+                data = text ? JSON.parse(text) : {success: true};
             } catch (jsonError) {
                 console.warn("JSON parse xatosi:", jsonError);
-                data = { success: true }; // Agar bo'sh qaytsa, muvaffaqiyatli deb hisoblaymiz
+                data = {success: true}; // Agar bo'sh qaytsa, muvaffaqiyatli deb hisoblaymiz
             }
 
             // 🔹 4. Biznes mantiq (data.success)
@@ -3248,16 +3422,20 @@
         e.preventDefault();
 
         const amountUsd = parseFloat(document.getElementById('teAmountUsd').value);
-        const tripId = document.getElementById('teTripId').value;
+        const rawTripId = document.getElementById('teTripId').value;
+        const truckId = document.getElementById('teTruckId').value;
+
+        // tripId ni tekshirish: agar bo'sh string bo'lsa null qilamiz, aks holda raqamga o'giramiz
+        const tripId = (rawTripId === "" || rawTripId === "null") ? null : parseInt(rawTripId);
 
         if (!amountUsd || amountUsd <= 0) {
-            alert("USD summa 0 dan katta bo'lishi shart!");
+            showNotify("Xato", "USD summa 0 dan katta bo'lishi shart!", "warning");
             return;
         }
 
         const payload = {
-            truckId: parseInt(document.getElementById('teTruckId').value),
-            tripId: parseInt(tripId),
+            truckId: parseInt(truckId),
+            tripId: tripId, // Bu yerda raqam yoki null ketadi
             truckExpenseType: document.getElementById('teType').value,
             amountUsd: amountUsd,
             amountLocal: parseFloat(document.getElementById('teAmountLocal').value) || 0,
@@ -3266,24 +3444,37 @@
             expenseDate: document.getElementById('teDate').value
         };
 
-        const response = await fetch(`${API_BASE}/truck-expense/create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify(payload)
-        });
+        try {
+            const response = await fetch(`${API_BASE}/truck-expense/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(payload)
+            });
 
-        const data = await response.json();
-        if (data.success) {
-            document.getElementById('truckExpenseForm').reset();
-            showTripDetails(tripId);
-            closeTruckExpenseModal();
-            showNotify("Muvaffaqiyat", "Xarajat saqlandi", "success");
-        } else {
-            console.error('Error:', error);
-            showNotify("Xato", data.message || "Xatolik!");
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById('truckExpenseForm').reset();
+                closeTruckExpenseModal();
+                showNotify("Muvaffaqiyat", "Xarajat saqlandi", "success");
+
+                // Mantiqni tekshirish:
+                if (tripId !== null) {
+                    // Agar reysga tegishli bo'lsa, reys detallarini yangilaymiz
+                    showTripDetails(tripId);
+                } else {
+                    // Agar garaj xarajati (null) bo'lsa, mashina sahifasini yangilaymiz
+                    viewTruck(truckId);
+                }
+            } else {
+                showNotify("Xato", data.message || "Xatolik yuz berdi");
+            }
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            showNotify("Xato", "Server bilan aloqa uzildi");
         }
     };
 

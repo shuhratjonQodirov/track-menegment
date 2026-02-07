@@ -15,10 +15,10 @@ public class TruckExpenseValidator {
         if (expenseReq.getTruckId() == null || expenseReq.getTruckId() <= 0) {
             throw new ValidationException("Truck Id bo'sh yoki natog'ri");
         }
-        if (expenseReq.getTripId() == null || expenseReq.getTripId() <= 0) {
-            throw new ValidationException("Trip Id bo'sh yoki natog'ri");
-
-        }
+//        if (expenseReq.getTripId() == null || expenseReq.getTripId() <= 0) {
+//            throw new ValidationException("Trip Id bo'sh yoki natog'ri");
+//
+//        }
         if (StringUtils.isBlank(expenseReq.getTruckExpenseType())) {
             throw new ValidationException("Truck expense type cannot be empty");
         }

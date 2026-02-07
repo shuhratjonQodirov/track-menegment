@@ -1,6 +1,8 @@
 package com.example.trackmenegment.service.impl;
 
 import com.example.trackmenegment.dto.req.TruckExpenseReq;
+import com.example.trackmenegment.dto.res.TruckExpenseDto;
+import com.example.trackmenegment.dto.res.TruckExpenseResDto;
 import com.example.trackmenegment.enums.Currency;
 import com.example.trackmenegment.enums.TruckExpenseType;
 import com.example.trackmenegment.error.ByIdException;
@@ -17,6 +19,9 @@ import com.example.trackmenegment.validator.TruckExpenseValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TruckExpenseServiceImpl implements TruckExpenseService {
@@ -30,7 +35,11 @@ public class TruckExpenseServiceImpl implements TruckExpenseService {
     public ApiResponse create(TruckExpenseReq expenseReq) {
 
         truckExpenseValidator.validateForCreate(expenseReq);
-        Trip trip = tripRepository.findByIdAndDeletedFalse(expenseReq.getTripId()).orElseThrow(() -> new ByIdException("Trip not found"));
+        Trip trip = null;
+        if (expenseReq.getTripId() != null) {
+            trip = tripRepository.findByIdAndDeletedFalse(expenseReq.getTripId()).orElseThrow(() -> new ByIdException("Trip not found"));
+        }
+
         Truck truck = truckRepository.findByIdAndDeletedFalse(expenseReq.getTruckId()).orElseThrow(() -> new ByIdException("Truck not found"));
 
         TruckExpense expense = truckExpenseMapper.toEntity(expenseReq, truck, trip);
@@ -71,6 +80,33 @@ public class TruckExpenseServiceImpl implements TruckExpenseService {
         truckExpenseRepository.save(expense);
 
         return new ApiResponse("Muvaffaqiyatli yangilandi", true);
+    }
+
+    @Override
+    public ApiResponse getTruckExpense(Long truckId) {
+        Truck truck = truckRepository.findByIdAndDeletedFalse(truckId).orElseThrow(() -> new ByIdException("Truck not found"));
+        List<TruckExpenseResDto> list = truckExpenseRepository.findAllByTruckAndDeletedFalse(truck).stream()
+                .map(truckExpenseMapper::toDto).toList();
+
+        BigDecimal amountByTrip = calculateTotalAmountByTrip(list);
+        BigDecimal amountByGarage = calculateTotalAmountByGaraj(list);
+
+        TruckExpenseDto dto = TruckExpenseDto.builder().list(list).totalAmountByTrip(amountByTrip).totalAmountByGarage(amountByGarage).build();
+
+        return new ApiResponse("List of truck expense", true, dto);
+    }
+
+    private BigDecimal calculateTotalAmountByGaraj(List<TruckExpenseResDto> list) {
+        return list.stream().filter(truckExpenseResDto -> truckExpenseResDto.getTripId() == null)
+                .map(TruckExpenseResDto::getAmountUsd)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    }
+
+    private BigDecimal calculateTotalAmountByTrip(List<TruckExpenseResDto> list) {
+        return list.stream().filter(truckExpenseResDto -> truckExpenseResDto.getTripId() != null)
+                .map(TruckExpenseResDto::getAmountUsd)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 

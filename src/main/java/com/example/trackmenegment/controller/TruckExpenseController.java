@@ -28,8 +28,14 @@ public class TruckExpenseController {
     }
 
     @PutMapping("/{truckExpense}")
-    public HttpEntity<?> update(@PathVariable Long truckExpense,@RequestBody TruckExpenseReq truckExpenseReq) {
-        ApiResponse response = truckExpenseService.update(truckExpense,truckExpenseReq);
+    public HttpEntity<?> update(@PathVariable Long truckExpense, @RequestBody TruckExpenseReq truckExpenseReq) {
+        ApiResponse response = truckExpenseService.update(truckExpense, truckExpenseReq);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/expenses/{truckId}")
+    public HttpEntity<?> getTruckExpense(@PathVariable Long truckId) {
+        ApiResponse response = truckExpenseService.getTruckExpense(truckId);
         return ResponseEntity.ok(response);
     }
 }
