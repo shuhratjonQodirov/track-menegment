@@ -184,6 +184,14 @@ public class TripServiceImpl implements TripService {
         return new ApiResponse("Driver Tomonidan bajarilgan reyslar", true, list);
     }
 
+    @Override
+    public ApiResponse getTripByTruckId(Long truckId) {
+
+        Truck truck = truckRepository.findByIdAndDeletedFalse(truckId).orElseThrow(() -> new ByIdException("Truck not found"));
+        List<TripResDto> list = tripRepository.findAllByTruckAndDeletedFalse(truck).stream().map(tripMapper::toDto).toList();
+        return new ApiResponse("List of Trip by truck id", true, list);
+    }
+
 
     public int calculateTripDuration(LocalDate startedDate, LocalDate finishedDate) {
         if (startedDate == null) {

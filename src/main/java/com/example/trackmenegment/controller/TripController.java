@@ -42,4 +42,12 @@ public class TripController {
         ApiResponse response=tripService.getTripByUserId(userId);
         return ResponseEntity.ok(response);
     }
+
+     @GetMapping("/truck-trips/{truckId}")
+        public HttpEntity<?> getTripsByTruckId(@PathVariable Long truckId){
+        ApiResponse response=tripService.getTripByTruckId(truckId);
+        return ResponseEntity.ok(response);
+    }
+
+
 }

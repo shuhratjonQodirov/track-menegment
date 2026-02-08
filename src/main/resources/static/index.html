@@ -7,7 +7,23 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
 
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
         @keyframes highlightRow {
             0% {
                 background-color: #dbeafe;
@@ -68,6 +84,43 @@
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+        .settings-nav-btn {
+            color: #64748b;
+            background: transparent;
+        }
+
+        .settings-nav-btn:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .settings-nav-btn.active {
+            background: #3b82f6;
+            color: white;
+            shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .settings-section-content {
+            animation: fadeInUp 0.3s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .lg\:col-span-1 {
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
@@ -356,180 +409,289 @@
     </div>
 
     <!-- Settings Tab -->
-    <div id="settings-tab" class="tab-content container mx-auto p-4 hidden">
-        <style>
-            .settings-layout {
-                display: grid;
-                grid-template-columns: 280px 1fr;
-                gap: 25px;
-            }
+    <!-- Settings Tab (YANGILANGAN) -->
+    <div id="settings-tab" class="tab-content hidden">
+        <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
+            <div class="max-w-7xl mx-auto">
 
-            .settings-sidebar {
-                background: #f8fafc;
-                border-radius: 12px;
-                padding: 15px;
-                height: fit-content;
-                border: 1px solid #e2e8f0;
-            }
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">⚙️ Sozlamalar</h1>
+                    <p class="text-gray-500">Tizim sozlamalarini boshqaring</p>
+                </div>
 
-            .sidebar-item {
-                padding: 12px 16px;
-                margin-bottom: 6px;
-                border-radius: 8px;
-                cursor: pointer;
-                transition: all 0.2s;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                color: #475569;
-                font-weight: 500;
-            }
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-            .sidebar-item:hover {
-                background: #f1f5f9;
-            }
+                    <!-- Sidebar Navigation -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 space-y-2 sticky top-4">
+                            <button onclick="switchSettingsSection('profile')"
+                                    class="settings-nav-btn active w-full text-left px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-3">
+                                <span class="text-xl">👤</span>
+                                <span>Profil</span>
+                            </button>
 
-            .sidebar-item.active {
-                background: #2563eb;
-                color: white;
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-            }
+                            <button onclick="switchSettingsSection('security')"
+                                    class="settings-nav-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-3">
+                                <span class="text-xl">🔐</span>
+                                <span>Xavfsizlik</span>
+                            </button>
 
-            .settings-content {
-                background: white;
-                border-radius: 12px;
-                padding: 30px;
-                border: 1px solid #e2e8f0;
-                min-height: 600px;
-            }
+                            <button onclick="switchSettingsSection('transport')"
+                                    class="settings-nav-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-3">
+                                <span class="text-xl">🚛</span>
+                                <span>Transport</span>
+                            </button>
 
-            .settings-section {
-                display: none;
-            }
-
-            .settings-section.active {
-                display: block;
-                animation: fadeIn 0.3s ease;
-            }
-
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(5px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .form-label {
-                display: block;
-                font-weight: 600;
-                margin-bottom: 8px;
-                color: #475569;
-                font-size: 13px;
-            }
-
-            .form-input {
-                width: 100%;
-                padding: 10px 14px;
-                border: 1px solid #cbd5e1;
-                border-radius: 8px;
-                font-size: 14px;
-                transition: 0.2s;
-            }
-
-            .btn-save {
-                background: #2563eb;
-                color: white;
-                padding: 10px 24px;
-                border-radius: 8px;
-                font-weight: 600;
-                transition: 0.2s;
-                border: none;
-                cursor: pointer;
-            }
-
-            @media (max-width: 992px) {
-                .settings-layout {
-                    grid-template-columns: 1fr;
-                }
-
-                .settings-sidebar {
-                    display: flex;
-                    overflow-x: auto;
-                    gap: 10px;
-                }
-            }
-        </style>
-
-        <div class="settings-layout">
-            <aside class="settings-sidebar">
-                <div class="sidebar-item active" data-section="profile">👤 Profil</div>
-                <div class="sidebar-item" data-section="account">🔐 Xavfsizlik</div>
-                <div class="sidebar-item" data-section="transport">🚛 Transport</div>
-                <div class="sidebar-item" data-section="backup">💾 Ma'lumotlar</div>
-            </aside>
-
-            <main class="settings-content">
-                <section class="settings-section active" id="profile">
-                    <h2 class="text-2xl font-bold mb-6">Foydalanuvchi ma'lumotlari</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label class="form-label">Ism</label>
-                            <input type="text" class="form-input" id="set_name" value="Qodirov">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Familiya</label>
-                            <input type="text" class="form-input" id="set_surname" value="Shuhratjon">
+                            <button onclick="switchSettingsSection('backup')"
+                                    class="settings-nav-btn w-full text-left px-4 py-3 rounded-xl font-semibold text-sm transition-all flex items-center gap-3">
+                                <span class="text-xl">💾</span>
+                                <span>Ma'lumotlar</span>
+                            </button>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <label class="form-label">Telefon</label>
-                        <input type="tel" class="form-input" id="set_phone" value="+998905823433">
-                    </div>
-                    <button class="btn-save mt-6" onclick="saveProfileSettings()">O'zgarishlarni saqlash</button>
-                </section>
 
-                <section class="settings-section" id="account">
-                    <h2 class="text-2xl font-bold mb-6">Xavfsizlik</h2>
-                    <div class="space-y-4">
-                        <div class="form-group">
-                            <label class="form-label">Yangi parol</label>
-                            <input type="password" class="form-input" id="new_pass" placeholder="••••••••">
-                        </div>
-                    </div>
-                    <button class="btn-save mt-6">Parolni yangilash</button>
-                </section>
+                    <!-- Content Area -->
+                    <div class="lg:col-span-3">
 
-                <section class="settings-section" id="transport">
-                    <h2 class="text-2xl font-bold mb-6">Tariflar</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label class="form-label">Yoqilg'i narxi (1L)</label>
-                            <input type="number" class="form-input" value="11000">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Xizmat haqi (1km)</label>
-                            <input type="number" class="form-input" value="2500">
-                        </div>
-                    </div>
-                    <button class="btn-save mt-6">Saqlash</button>
-                </section>
+                        <!-- ======= PROFIL BO'LIMI ======= -->
+                        <div id="settings-profile" class="settings-section-content">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                                <div class="flex items-center gap-3 mb-6 pb-6 border-b">
+                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl">
+                                        👤
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-gray-800">Foydalanuvchi ma'lumotlari</h2>
+                                        <p class="text-sm text-gray-500">Shaxsiy ma'lumotlaringizni yangilang</p>
+                                    </div>
+                                </div>
 
-                <section class="settings-section" id="backup">
-                    <h2 class="text-2xl font-bold mb-6 text-red-600">Ma'lumotlar</h2>
-                    <div class="p-6 bg-red-50 rounded-xl border border-red-100">
-                        <p class="text-red-800 mb-4">Barcha reyslar va moliyaviy ma'lumotlarni eksport qiling.</p>
-                        <button class="bg-white border border-red-200 text-red-600 px-4 py-2 rounded-lg font-bold">📥
-                            Excel Eksport
-                        </button>
+                                <div class="space-y-6">
+                                    <!-- Ism va Familiya -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                                Ism <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" id="set_name"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                                   placeholder="Ismingiz">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-bold text-gray-700 mb-2">
+                                                Familiya <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="text" id="set_surname"
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                                   placeholder="Familiyangiz">
+                                        </div>
+                                    </div>
+
+                                    <!-- Telefon -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                                            Telefon raqami <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="tel" id="set_phone"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                                               placeholder="+998 90 123 45 67">
+                                    </div>
+
+                                    <!-- Manzil (Read-only) -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                                            Manzil
+                                        </label>
+                                        <input type="text" id="set_address"
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600"
+                                               disabled>
+                                    </div>
+
+                                    <!-- Lavozim (Read-only) -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                                            Lavozim
+                                        </label>
+                                        <div class="flex items-center gap-3">
+                                        <span id="set_role" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-bold text-sm">
+                                            LOADING...
+                                        </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Saqlash tugmasi -->
+                                    <div class="flex gap-3 pt-4">
+                                        <button onclick="saveProfileSettings()"
+                                                class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95">
+                                            💾 Saqlash
+                                        </button>
+                                        <button onclick="loadSettingsData()"
+                                                class="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all active:scale-95">
+                                            🔄 Qayta yuklash
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ======= XAVFSIZLIK BO'LIMI ======= -->
+                        <div id="settings-security" class="settings-section-content hidden">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                                <div class="flex items-center gap-3 mb-6 pb-6 border-b">
+                                    <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl">
+                                        🔐
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-gray-800">Xavfsizlik va Parol</h2>
+                                        <p class="text-sm text-gray-500">Parolingizni o'zgartiring</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-6">
+                                    <!-- Yangi parol -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                                            Yangi parol <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="password" id="new_pass"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
+                                               placeholder="Kamida 6 ta belgi">
+                                        <p class="text-xs text-gray-500 mt-1">Kuchli parol yarating (harflar, raqamlar, belgilar)</p>
+                                    </div>
+
+                                    <!-- Parolni tasdiqlash -->
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                                            Parolni tasdiqlash <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="password" id="confirm_pass"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition"
+                                               placeholder="Parolni qayta kiriting">
+                                    </div>
+
+                                    <!-- Xavfsizlik xabari -->
+                                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                                        <div class="flex gap-3">
+                                            <span class="text-xl">⚠️</span>
+                                            <div>
+                                                <p class="font-bold text-yellow-800 text-sm">Muhim eslatma</p>
+                                                <p class="text-yellow-700 text-xs mt-1">
+                                                    Parolni o'zgartirgandan keyin qaytadan tizimga kirishingiz kerak bo'ladi.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Yangilash tugmasi -->
+                                    <div class="pt-4">
+                                        <button onclick="changePassword()"
+                                                class="px-8 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg shadow-red-100 active:scale-95">
+                                            🔒 Parolni yangilash
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ======= TRANSPORT BO'LIMI ======= -->
+                        <div id="settings-transport" class="settings-section-content hidden">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                                <div class="flex items-center gap-3 mb-6 pb-6 border-b">
+                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl">
+                                        🚛
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-gray-800">Tariflar va Narxlar</h2>
+                                        <p class="text-sm text-gray-500">Transport xizmatlari narxlari</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
+                                        <p class="text-sm text-orange-600 font-bold mb-2">YOQILG'I NARXI</p>
+                                        <p class="text-3xl font-black text-orange-700 mb-1">11,000 <span class="text-lg">so'm</span></p>
+                                        <p class="text-xs text-orange-600">1 litr uchun</p>
+                                    </div>
+
+                                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                                        <p class="text-sm text-blue-600 font-bold mb-2">XIZMAT HAQI</p>
+                                        <p class="text-3xl font-black text-blue-700 mb-1">2,500 <span class="text-lg">so'm</span></p>
+                                        <p class="text-xs text-blue-600">1 kilometr uchun</p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-xl">ℹ️</span>
+                                        <div>
+                                            <p class="font-bold text-gray-700 text-sm">Ma'lumot</p>
+                                            <p class="text-gray-600 text-xs mt-1">
+                                                Bu bo'lim hozircha faqat ko'rish uchun. Tariflarni o'zgartirish funksiyasi keyingi yangilanishda qo'shiladi.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ======= BACKUP BO'LIMI ======= -->
+                        <div id="settings-backup" class="settings-section-content hidden">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+                                <div class="flex items-center gap-3 mb-6 pb-6 border-b">
+                                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-2xl">
+                                        💾
+                                    </div>
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-gray-800">Ma'lumotlarni eksport qilish</h2>
+                                        <p class="text-sm text-gray-500">Barcha ma'lumotlarni yuklab oling</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <!-- Excel eksport -->
+                                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h3 class="font-bold text-green-800 text-lg mb-2">📊 Excel Hisobot</h3>
+                                                <p class="text-green-700 text-sm mb-4">
+                                                    Barcha reyslar, xarajatlar va moliyaviy ma'lumotlarni Excel formatida yuklab oling.
+                                                </p>
+                                                <button onclick="exportAllData()"
+                                                        class="px-6 py-2 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition-all active:scale-95">
+                                                    📥 Yuklab olish (Tez orada)
+                                                </button>
+                                            </div>
+                                            <div class="text-6xl opacity-20">📊</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- PDF eksport -->
+                                    <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-6 border border-red-200">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <h3 class="font-bold text-red-800 text-lg mb-2">📄 PDF Hisobot</h3>
+                                                <p class="text-red-700 text-sm mb-4">
+                                                    Taqdimot uchun tayyor formatda hisobot yarating.
+                                                </p>
+                                                <button onclick="exportPDF()"
+                                                        class="px-6 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all active:scale-95">
+                                                    📥 Yuklab olish (Tez orada)
+                                                </button>
+                                            </div>
+                                            <div class="text-6xl opacity-20">📄</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                </section>
-            </main>
+                </div>
+            </div>
         </div>
     </div>
+
     <!-- User Details Section -->
     <div id="userDetailsSection" class="hidden">
         <!-- Batafsil ma'lumotlar shu yerda -->
@@ -1157,10 +1319,117 @@
         }
     });
 
-    function saveProfileSettings() {
-        // Bu yerda API orqali profilni yangilash kodi bo'ladi
-        showNotify("Muvaffaqiyatli", "Profil ma'lumotlari yangilandi", "success");
+    // ============================================
+    // SETTINGS BO'LIMI UCHUN YANGI FUNKSIYALAR
+    // ============================================
+
+    // 1. Profil ma'lumotlarini saqlash
+    async function saveProfileSettings() {
+        const userId = currentUser.id;
+
+        const fullName = document.getElementById('set_name')?.value.trim() + ' ' +
+            document.getElementById('set_surname')?.value.trim();
+        const phoneNumber = document.getElementById('set_phone')?.value.trim();
+
+        if (!fullName.trim() || !phoneNumber.trim()) {
+            showNotify("Xato", "Barcha maydonlarni to'ldiring!", "warning");
+            return;
+        }
+
+        const payload = {
+            fullName: fullName.trim(),
+            phoneNumber: phoneNumber,
+            address: currentUser.address,
+            passportNumber: currentUser.passportNumber,
+            pnfl: currentUser.pnfl,
+            brithDate: currentUser.brithDate,
+            hireDate: currentUser.hireDate
+        };
+
+        try {
+            const response = await fetch(`${API_BASE}/user/update/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showNotify("Muvaffaqiyatli!", "Profil ma'lumotlari yangilandi", "success");
+                await loadCurrentUser();
+                await loadSettingsData();
+            } else {
+                showNotify("Xatolik", result.message || "Yangilashda xatolik", "error");
+            }
+        } catch (error) {
+            console.error("Profile Update Error:", error);
+            showNotify("Xatolik", "Server bilan bog'lanishda xatolik", "error");
+        }
     }
+
+    // Parol o'zgartirish (Oldingi funksiya)
+    async function changePassword() {
+        const userId = currentUser.id;
+        const newPassword = document.getElementById('new_pass')?.value;
+        const confirmPassword = document.getElementById('confirm_pass')?.value;
+
+        if (!newPassword || !confirmPassword) {
+            showNotify("Xato", "Iltimos, barcha maydonlarni to'ldiring!", "warning");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            showNotify("Xato", "Parol kamida 6 ta belgidan iborat bo'lishi kerak!", "warning");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            showNotify("Xato", "Parollar bir xil emas!", "warning");
+            return;
+        }
+
+        const payload = { newPassword: newPassword };
+
+        try {
+            const response = await fetch(`${API_BASE}/user/change-password/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showNotify("Muvaffaqiyatli!", "Parol muvaffaqiyatli yangilandi", "success");
+                document.getElementById('new_pass').value = '';
+                document.getElementById('confirm_pass').value = '';
+            } else {
+                showNotify("Xatolik", result.message || "Parolni yangilashda xatolik", "error");
+            }
+        } catch (error) {
+            console.error("Password Change Error:", error);
+            showNotify("Xatolik", "Server bilan bog'lanishda xatolik", "error");
+        }
+    }
+
+    // Export funksiyalari (Placeholder)
+    function exportAllData() {
+        showNotify("Ma'lumot", "Bu funksiya tez orada qo'shiladi", "info");
+    }
+
+    function exportPDF() {
+        showNotify("Ma'lumot", "Bu funksiya tez orada qo'shiladi", "info");
+    }
+
+
+
 
     // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -1465,34 +1734,35 @@
     }
 
     function showTab(tabName) {
-        // 1. Barcha tablarni yashirish (Hozir dashboard-tab ham yashiriladi)
+        // Barcha tablarni yashirish
         const tabs = document.querySelectorAll('.tab-content');
-        tabs.forEach(tab => {
-            tab.classList.add('hidden');
-        });
+        tabs.forEach(tab => tab.classList.add('hidden'));
 
-        // 2. Navigatsiya tugmalaridan aktiv rangni olib tashlash
+        // Navigatsiya tugmalarini yangilash
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('bg-blue-600', 'text-white', 'bg-gray-100');
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('bg-gray-100');
         });
 
-        // 3. Tanlangan tabni ko'rsatish
+        // Tanlangan tabni ko'rsatish
         const selectedTab = document.getElementById(`${tabName}-tab`);
         if (selectedTab) {
             selectedTab.classList.remove('hidden');
         }
 
-        // 4. Tanlangan tugmani aktiv qilish
+        // Tanlangan tugmani aktiv qilish
         const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
         if (activeBtn) {
+            activeBtn.classList.remove('bg-gray-100');
             activeBtn.classList.add('bg-blue-600', 'text-white');
         }
 
-        // 5. Ma'lumotlarni yuklash (Faqat kerakli bo'lim yuklanadi)
+        // Ma'lumotlarni yuklash
         if (tabName === 'dashboard') loadDashboard();
         else if (tabName === 'users') loadAllUsers();
         else if (tabName === 'trucks') loadTrucks();
         else if (tabName === 'trips') loadTrips();
+        else if (tabName === 'settings') loadSettingsData(); // ← YANGI
     }
 
     async function loadDashboard() {
@@ -1992,6 +2262,7 @@
         }
     }
     let currentView = 'list';
+
     async function viewTruck(id) {
         currentView = 'detail';
         try {
@@ -2103,15 +2374,112 @@
 </div>
                 </div>
             `;
-                // 2. !!! MUHIM QISMI: HTML chizib bo'lingandan keyin xarajatlarni yuklaymiz
-                // truck.id - bu API dan kelgan mashina ID si
                 loadTruckExpenses(truck.id);
 
-                // Agar reyslar ro'yxati ham alohida API bo'lsa, uni ham shu yerda chaqirasiz
-                // loadCompletedTrips(truck.id);
+                  loadTruckTrips(truck.id);
             }
         } catch (error) {
             console.error("Xatolik:", error);
+        }
+    }
+
+    async function loadTruckTrips(truckId) {
+        const container = document.getElementById('completedTripsList');
+        if (!container) return;
+
+        // Loading... (UI o'zgarmadi)
+        container.innerHTML = `<div class="p-6 text-center text-gray-400 italic bg-gray-50 rounded-xl"><div class="animate-pulse">Yuklanmoqda...</div></div>`;
+
+        try {
+            const response = await fetch(`${API_BASE}/trip/truck-trips/${truckId}`, {
+                headers: {'Authorization': `Bearer ${authToken}`}
+            });
+
+            if (!response.ok) throw new Error(`HTTP xatosi: ${response.status}`);
+
+            const data = await response.json();
+
+            // 1. API-dan kelgan massivni olish
+            const allTrips = data.object || [];
+
+            const truckTrips = allTrips;
+
+            if (truckTrips.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-gray-400 italic bg-gray-50 rounded-xl">Ma'lumot topilmadi</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            ${truckTrips.map(trip => {
+                const statusConfig = {
+                    'COMPLETED': { label: 'Tugatilgan', color: 'bg-green-50 text-green-700 border-green-200', icon: '✅' },
+                    'IN_PROGRESS': { label: 'Jarayonda', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: '🔄' },
+                    'WAITING_CONFIRMATION': { label: 'Kutilmoqda', color: 'bg-amber-50 text-amber-700 border-amber-200', icon: '⏳' }
+                };
+                const status = statusConfig[trip.tripStatus] || statusConfig['IN_PROGRESS'];
+                const totalIncome = (Number(trip.incomeOutUsd) || 0) + (Number(trip.incomeBackUsd) || 0);
+
+                return `
+                    <div class="bg-white border-2 border-gray-100 rounded-2xl p-5 hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+                         onclick="openTripFromTruck(${trip.id}, ${truckId})">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">#${trip.id}</span>
+                                <span class="px-2 py-0.5 rounded-lg text-xs font-bold border ${status.color}">${status.icon} ${status.label}</span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xl font-black text-blue-600">$${totalIncome.toLocaleString()}</p>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase">Jami</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <h4 class="text-base font-bold text-gray-800 flex items-center gap-2">${trip.routeFrom} <span class="text-blue-400">→</span> ${trip.routeTo}</h4>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-3">
+                            <div class="flex items-center gap-1"><span>👤</span><span class="truncate">${trip.fullName || 'Haydovchi'}</span></div>
+                            <div class="flex items-center gap-1"><span>📅</span><span>${trip.startedDate || '-'}</span></div>
+                            <div class="flex items-center gap-1"><span>⏱</span><span>${trip.tripDuration || 0} kun</span></div>
+                            <div class="flex items-center gap-1"><span>💰</span><span class="text-green-600 font-bold">${trip.profitUsd ? '$' + trip.profitUsd.toFixed(2) : 'Hisobda'}</span></div>
+                        </div>
+                        <div class="pt-3 border-t border-gray-100 flex justify-end">
+                            <span class="text-xs text-blue-600 group-hover:text-blue-700 font-bold flex items-center gap-1">
+                                Batafsil <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                            </span>
+                        </div>
+                    </div>`;
+            }).join('')}
+        </div>`;
+        } catch (error) {
+            container.innerHTML = `<div class="p-8 text-center text-red-400 bg-red-50 rounded-xl border border-red-100">⚠️ Xatolik: ${error.message}</div>`;
+        }
+    }
+
+    async function openTripFromTruck(tripId, truckId) {
+        // truckId ni global o'zgaruvchiga saqlash (ortga qaytish uchun)
+        window.lastViewedTruckId = truckId;
+
+        const trucksTab = document.getElementById('trucks-tab');
+        const tripsTab = document.getElementById('trips-tab');
+
+        if (trucksTab) trucksTab.classList.add('hidden');
+        if (tripsTab) {
+            tripsTab.classList.remove('hidden');
+
+            // Reys detallarini yuklash
+            await showTripDetails(tripId);
+
+            // Navigatsiya tugmasini yangilash
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-gray-100');
+            });
+
+            const tripsBtn = document.querySelector('[data-tab="trips"]');
+            if (tripsBtn) {
+                tripsBtn.classList.remove('bg-gray-100');
+                tripsBtn.classList.add('bg-blue-600', 'text-white');
+            }
         }
     }
 
@@ -2496,6 +2864,21 @@
     function renderExpenseItems(containerId, list) {
         const container = document.getElementById(containerId);
 
+        // Expense type nomlarini o'zbekchaga o'girish
+        const expenseTypeNames = {
+            'TIRE': 'Balon',
+            'OIL_CHANGE': 'Moy almashtirish',
+            'FILTER': 'Filtr',
+            'BRAKE_REPAIR': 'Tormoz ta\'miri',
+            'ENGINE_REPAIR': 'Dvigatel ta\'miri',
+            'WASH': 'Yuvish',
+            'TECH_INSPECTION': 'Texosmot',
+            'INSURANCE': 'Sug\'urta',
+            'TAX': 'Yo\'l solig\'i',
+            'PARKING': 'To\'xtash joyi',
+            'OTHER': 'Boshqa'
+        };
+
         if (list.length === 0) {
             container.innerHTML = `<div class="p-8 text-center text-gray-400 italic">Ma'lumot topilmadi</div>`;
             return;
@@ -2504,7 +2887,10 @@
         container.innerHTML = list.map(exp => `
         <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl group hover:bg-white border border-transparent hover:border-blue-100 transition-all shadow-sm mb-3">
             <div class="flex flex-col">
-                <span class="font-bold text-slate-700 text-[13px] uppercase">${exp.truckExpenseType.replace('_', ' ')}</span>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-700 text-[13px]">${expenseTypeNames[exp.truckExpenseType] || exp.truckExpenseType}</span>
+                    ${exp.tripId ? `<span class="text-[10px] bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">Reys #${exp.tripId}</span>` : ''}
+                </div>
                 <span class="text-[11px] text-gray-400 mt-1">${exp.expenseDate} • ${exp.description || ''}</span>
             </div>
             <div class="text-right flex items-center gap-3">
@@ -3736,8 +4122,20 @@
     }
 
     function closeTripDetails() {
-        document.getElementById('tripDetailsSection').classList.add('hidden');
-        document.getElementById('tripsList').classList.remove('hidden');
+        const detailsSection = document.getElementById('tripDetailsSection');
+        const tripsList = document.getElementById('tripsList');
+
+        // Agar mashinadan kelgan bo'lsa, mashinaga qaytish
+        if (window.lastViewedTruckId) {
+            detailsSection.classList.add('hidden');
+            showTab('trucks');
+            viewTruck(window.lastViewedTruckId);
+            window.lastViewedTruckId = null;
+        } else {
+            // Aks holda trips listiga qaytish
+            detailsSection.classList.add('hidden');
+            if (tripsList) tripsList.classList.remove('hidden');
+        }
     }
 
     // Clos modals on outside click
@@ -3748,6 +4146,59 @@
             }
         });
     });
+    function switchSettingsSection(sectionName) {
+        // Barcha section-larni yashirish
+        document.querySelectorAll('.settings-section-content').forEach(section => {
+            section.classList.add('hidden');
+        });
+
+        // Barcha navigation tugmalaridan active klassni olib tashlash
+        document.querySelectorAll('.settings-nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // Tanlangan section-ni ko'rsatish
+        const targetSection = document.getElementById(`settings-${sectionName}`);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+        }
+
+        // Tanlangan tugmani active qilish
+        event.target.closest('.settings-nav-btn').classList.add('active');
+    }
+
+    // Settings ma'lumotlarini yuklash (yangilangan)
+    async function loadSettingsData() {
+        if (!currentUser) {
+            await loadCurrentUser();
+        }
+
+        // Ism va Familiyani ajratish
+        const nameParts = currentUser.fullName?.split(' ') || ['', ''];
+        document.getElementById('set_name').value = nameParts[0] || '';
+        document.getElementById('set_surname').value = nameParts.slice(1).join(' ') || '';
+
+        // Telefon
+        document.getElementById('set_phone').value = currentUser.phoneNumber || '';
+
+        // Manzil (Read-only)
+        document.getElementById('set_address').value = currentUser.address || '-';
+
+        // Lavozim
+        const roleElement = document.getElementById('set_role');
+        if (roleElement) {
+            roleElement.textContent = currentUser.role || 'USER';
+
+            // Lavozimga qarab rang berish
+            const roleColors = {
+                'DRIVER': 'bg-blue-100 text-blue-700',
+                'MANAGER': 'bg-purple-100 text-purple-700',
+                'ECONOMIST': 'bg-green-100 text-green-700'
+            };
+
+            roleElement.className = `px-4 py-2 rounded-lg font-bold text-sm ${roleColors[currentUser.role] || 'bg-gray-100 text-gray-700'}`;
+        }
+    }
     // Check for existing token on page load
     window.addEventListener('load', () => {
         const savedToken = localStorage.getItem('authToken');

@@ -28,8 +28,10 @@ public class TripMapper {
 
 
     public TripResDto toDto(Trip trip) {
-        return TripResDto.builder().id(trip.getId()).truckNumber(trip.getTruck().getTruckNumber()).fullName(trip.getUser()
-                        .getFullName())
+        return TripResDto.builder()
+                .id(trip.getId())
+                .truckNumber(trip.getTruck().getTruckNumber())
+                .fullName(trip.getUser().getFullName())
                 .routeFrom(trip.getRouteFrom())
                 .routeTo(trip.getRouteTo())
                 .incomeOutUsd(trip.getIncomeOutUsd())
