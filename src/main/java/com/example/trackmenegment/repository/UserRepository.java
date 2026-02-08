@@ -1,5 +1,6 @@
 package com.example.trackmenegment.repository;
 
+import com.example.trackmenegment.enums.UserRoles;
 import com.example.trackmenegment.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -16,4 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPnflAndDeletedFalse(String pnfl);
 
     List<User> findAllByDeletedFalse();
+    Long countByRolesAndDeletedFalse(UserRoles role);
+
+    List<User> findByRolesAndDeletedFalse(UserRoles role);
 }

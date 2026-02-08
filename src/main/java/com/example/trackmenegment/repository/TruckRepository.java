@@ -1,5 +1,6 @@
 package com.example.trackmenegment.repository;
 
+import com.example.trackmenegment.enums.TruckStatus;
 import com.example.trackmenegment.model.Truck;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,7 @@ public interface TruckRepository extends JpaRepository<Truck, Long> {
 
     boolean existsByTruckNumberAndDeletedFalse(String truckNumber);
     List<Truck> findAllByDeletedFalse();
+
+    Long countByTruckStatusAndDeletedFalse(TruckStatus status);
 
 }

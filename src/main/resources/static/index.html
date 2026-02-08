@@ -6,6 +6,7 @@
     <title>Transport Boshqaruv Tizimi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
@@ -29,7 +30,6 @@
                 background-color: #dbeafe;
                 transform: scale(1.02);
             }
-            /* Blue-100 va biroz kattalashish */
             100% {
                 background-color: transparent;
                 transform: scale(1);
@@ -47,24 +47,22 @@
         }
 
         .modal {
-            display: none; /* Default holatda yopiq */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); /* Orqa fonni xiralashtirish */
+            background-color: rgba(0, 0, 0, 0.6);
             z-index: 9999;
-            align-items: center; /* Vertikal markazlash */
-            justify-content: center; /* Gorizontal markazlash */
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Modal ochilganda ushbu klass qo'shiladi */
         .modal.show {
             display: flex !important;
         }
 
-        /* Tailwind-ning hidden klassi bilan to'qnashuvni oldini olish uchun */
         .hidden {
             display: none !important;
         }
@@ -116,7 +114,6 @@
             }
         }
 
-        /* Responsive adjustments */
         @media (max-width: 1024px) {
             .lg\:col-span-1 {
                 margin-bottom: 1rem;
@@ -225,69 +222,273 @@
         </div>
     </div>
 
-    <!-- Dashboard Tab -->
-    <div id="dashboard-tab" class="tab-content container mx-auto p-6 bg-gray-50 min-h-screen">
-        <h2 class="text-3xl font-bold mb-8 text-gray-800">Boshqaruv Paneli</h2>
 
-        <div id="dashboardStats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white transition hover:scale-105">
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard-tab" class="tab-content container mx-auto p-6 bg-gray-50 min-h-screen">
+        <h2 class="text-3xl font-bold mb-8 text-gray-800">📊 Boshqaruv Paneli</h2>
+
+        <!-- ===== 1. ASOSIY STATISTIKA KARTOCHKALARI ===== -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+            <!-- Jami Reyslar -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg p-6 text-white transition hover:scale-105 cursor-pointer">
                 <div class="flex justify-between items-start">
                     <div>
                         <p class="text-sm font-medium opacity-80 uppercase tracking-wider">Jami Reyslar</p>
                         <p id="totalTrips" class="text-4xl font-bold mt-2">0</p>
+                        <p class="text-xs mt-1 opacity-70">Umumiy safar soni</p>
                     </div>
-                    <i class="fas fa-route text-2xl opacity-50"></i>
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
+
+            <!-- Jarayondagi Reyslar -->
+            <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl shadow-lg p-6 text-white transition hover:scale-105 cursor-pointer">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium opacity-80 uppercase tracking-wider">Jarayonda</p>
+                        <p id="inProgressTrips" class="text-4xl font-bold mt-2">0</p>
+                        <p class="text-xs mt-1 opacity-70">Faol reyslar</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Faol Mashinalar -->
+            <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl shadow-lg p-6 text-white transition hover:scale-105 cursor-pointer">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium opacity-80 uppercase tracking-wider">Faol Mashinalar</p>
+                        <p id="activeTrucks" class="text-4xl font-bold mt-2">0</p>
+                        <p class="text-xs mt-1 opacity-70">Ishlamoqda</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Jami Xodimlar -->
+            <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-lg p-6 text-white transition hover:scale-105 cursor-pointer">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium opacity-80 uppercase tracking-wider">Jami Xodimlar</p>
+                        <p id="totalUsers" class="text-4xl font-bold mt-2">0</p>
+                        <p class="text-xs mt-1 opacity-70">Barcha hodimlar</p>
+                    </div>
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
+        <!-- ===== 2. MOLIYAVIY HISOBOT ===== -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+            <!-- Moliyaviy Ko'rsatkichlar -->
             <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-                    <span class="text-blue-600">📊</span> Moliyaviy ko'rsatkichlar
+                    <span class="text-blue-600">💰</span> Moliyaviy ko'rsatkichlar
                 </h3>
 
-                <div class="relative h-64 mb-8">
-                    <canvas id="financeChart"></canvas>
+                <!-- Umumiy Daromad va Foyda -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
+                        <p class="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">Jami Daromad</p>
+                        <p id="totalIncome" class="text-3xl font-black text-green-700">$0</p>
+                        <p class="text-xs text-green-500 mt-1">Barcha reyslardan</p>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-5 border border-red-100">
+                        <p class="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">Jami Xarajat</p>
+                        <p id="totalExpense" class="text-3xl font-black text-red-700">$0</p>
+                        <p class="text-xs text-red-500 mt-1">Barcha chiqimlar</p>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                        <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Sof Foyda</p>
+                        <p id="netProfit" class="text-3xl font-black text-blue-700">$0</p>
+                        <p class="text-xs text-blue-500 mt-1">Daromad - Xarajat</p>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-6 pt-6 border-t border-gray-50">
+                <!-- Xarajatlar Tarkibi -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-gray-50">
                     <div class="text-center">
-                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Yoqilg'i</p>
-                        <p id="fuelExp" class="text-lg font-bold text-orange-600">$0</p>
+                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">⛽ Yoqilg'i</p>
+                        <p id="fuelExpense" class="text-lg font-bold text-orange-600">$0</p>
                     </div>
                     <div class="text-center">
-                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Texnik xizmat</p>
-                        <p id="serviceExp" class="text-lg font-bold text-purple-600">$0</p>
+                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">🔧 Ta'mirlash</p>
+                        <p id="truckExpense" class="text-lg font-bold text-purple-600">$0</p>
                     </div>
                     <div class="text-center">
-                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Oyliklar</p>
-                        <p id="salaryExp" class="text-lg font-bold text-blue-600">$0</p>
+                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">🛣️ Yo'l haqi</p>
+                        <p id="tripExpense" class="text-lg font-bold text-pink-600">$0</p>
                     </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500 uppercase font-semibold mb-1">💼 Oyliklar</p>
+                        <p id="salaryExpense" class="text-lg font-bold text-blue-600">$0</p>
+                    </div>
+                </div>
+
+                <!-- Chart.js Grafik -->
+                <div class="relative h-64 mt-8">
+                    <canvas id="financeChart"></canvas>
                 </div>
             </div>
 
+            <!-- Top Haydovchilar -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
                     <span class="text-purple-600">🏆</span> Top Haydovchilar
                 </h3>
-                <div id="topDriversList" class="space-y-6">
+                <div id="topDriversList" class="space-y-4">
+                    <!-- JS orqali to'ldiriladi -->
                 </div>
+            </div>
+
+        </div>
+
+        <!-- ===== 3. REYSLAR VA MASHINALAR ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+
+            <!-- Oxirgi Reyslar -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">📍 Oxirgi reyslar</h3>
+                    <button onclick="showTab('trips')" class="text-blue-600 hover:text-blue-700 text-sm font-bold">
+                        Barchasini ko'rish →
+                    </button>
+                </div>
+                <div id="recentTripsList" class="divide-y divide-gray-50">
+                    <!-- JS orqali to'ldiriladi -->
+                </div>
+            </div>
+
+            <!-- Mashinalar Holati -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800">🚛 Mashinalar holati</h3>
+                    <button onclick="showTab('trucks')" class="text-blue-600 hover:text-blue-700 text-sm font-bold">
+                        Barchasini ko'rish →
+                    </button>
+                </div>
+                <div id="truckStatusList" class="space-y-4">
+                    <!-- JS orqali to'ldiriladi -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== 4. OYLIK STATISTIKA (Yangi) ===== -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+
+            <!-- Ushbu Oyda -->
+            <div class="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-100">
+                <h4 class="text-sm font-bold text-cyan-700 uppercase tracking-widest mb-4">📅 Ushbu Oy</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Tugallangan reyslar:</span>
+                        <span id="monthCompletedTrips" class="font-bold text-cyan-700 text-lg">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Daromad:</span>
+                        <span id="monthIncome" class="font-bold text-green-600 text-lg">$0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Xarajat:</span>
+                        <span id="monthExpense" class="font-bold text-red-600 text-lg">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bugun -->
+            <div class="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-6 border border-violet-100">
+                <h4 class="text-sm font-bold text-violet-700 uppercase tracking-widest mb-4">🌟 Bugun</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Yangi reyslar:</span>
+                        <span id="todayNewTrips" class="font-bold text-violet-700 text-lg">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Yoqilg'i sarfi:</span>
+                        <span id="todayFuel" class="font-bold text-orange-600 text-lg">0L</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Xarajat:</span>
+                        <span id="todayExpense" class="font-bold text-red-600 text-lg">$0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- O'rtacha Ko'rsatkichlar -->
+            <div class="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl p-6 border border-amber-100">
+                <h4 class="text-sm font-bold text-amber-700 uppercase tracking-widest mb-4">📊 O'rtacha</h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Reys davomiyligi:</span>
+                        <span id="avgTripDuration" class="font-bold text-amber-700 text-lg">0 kun</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Reys daromadi:</span>
+                        <span id="avgTripIncome" class="font-bold text-green-600 text-lg">$0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 text-sm">Yoqilg'i sarfi:</span>
+                        <span id="avgFuelPerTrip" class="font-bold text-orange-600 text-lg">0L</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== 5. QARZDORLIK HOLATI (Yangi) ===== -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                <span class="text-red-600">💳</span> Qarzdorlik holati
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-red-50 rounded-xl p-6 border border-red-100">
+                    <p class="text-xs font-bold text-red-600 uppercase tracking-widest mb-2">To'lanmagan Oyliklar</p>
+                    <p id="unpaidSalaries" class="text-3xl font-black text-red-700">$0</p>
+                    <p class="text-xs text-red-500 mt-1"><span id="unpaidDriversCount">0</span> ta haydovchi</p>
+                </div>
+
+                <div class="bg-green-50 rounded-xl p-6 border border-green-100">
+                    <p class="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">To'langan Oyliklar</p>
+                    <p id="paidSalaries" class="text-3xl font-black text-green-700">$0</p>
+                    <p class="text-xs text-green-500 mt-1">Ushbu oy</p>
+                </div>
+
+                <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                    <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Jami Qarz</p>
+                    <p id="totalDebt" class="text-3xl font-black text-blue-700">$0</p>
+                    <p class="text-xs text-blue-500 mt-1">Barcha xodimlar</p>
+                </div>
+            </div>
+
+            <!-- Qarzdor Haydovchilar Ro'yxati -->
+            <div id="debtorsList" class="mt-6 space-y-3">
+                <!-- JS orqali to'ldiriladi -->
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h3 class="text-xl font-bold mb-6 text-gray-800">📍 Oxirgi reyslar</h3>
-                <div id="recentTripsList" class="divide-y divide-gray-50">
-                </div>
-            </div>
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-                <h3 class="text-xl font-bold mb-6 text-gray-800">🚛 Mashinalar holati</h3>
-                <div id="truckStatusList" class="space-y-4">
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Users Tab -->
@@ -409,7 +610,7 @@
     </div>
 
     <!-- Settings Tab -->
-    <!-- Settings Tab (YANGILANGAN) -->
+  
     <div id="settings-tab" class="tab-content hidden">
         <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
             <div class="max-w-7xl mx-auto">
@@ -1283,7 +1484,6 @@
             timer: 2100,
             showConfirmButton: icon === 'error',
             position: 'center',
-            // Apple Style sozlamalari
             background: 'rgba(255, 255, 255, 0.95)',
             backdrop: `rgba(0,0,0,0.1) blur(4px)`, // Orqa fonni xiralashtirish
             customClass: {
@@ -1319,11 +1519,6 @@
         }
     });
 
-    // ============================================
-    // SETTINGS BO'LIMI UCHUN YANGI FUNKSIYALAR
-    // ============================================
-
-    // 1. Profil ma'lumotlarini saqlash
     async function saveProfileSettings() {
         const userId = currentUser.id;
 
@@ -1371,7 +1566,6 @@
         }
     }
 
-    // Parol o'zgartirish (Oldingi funksiya)
     async function changePassword() {
         const userId = currentUser.id;
         const newPassword = document.getElementById('new_pass')?.value;
@@ -1419,7 +1613,6 @@
         }
     }
 
-    // Export funksiyalari (Placeholder)
     function exportAllData() {
         showNotify("Ma'lumot", "Bu funksiya tez orada qo'shiladi", "info");
     }
@@ -1428,10 +1621,6 @@
         showNotify("Ma'lumot", "Bu funksiya tez orada qo'shiladi", "info");
     }
 
-
-
-
-    // Login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('username').value;
@@ -1463,11 +1652,10 @@
             document.getElementById('loginError').classList.remove('hidden');
         }
     });
-    // Fuel form submit
+
     document.getElementById('fuelForm').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Ma'lumotlarni yig'ish
         const tripId = parseInt(document.getElementById('fuelTripId').value);
         const truckId = parseInt(document.getElementById('fuelTruckId').value);
         const litres = parseFloat(document.getElementById('fuelLitres').value);
@@ -1524,12 +1712,9 @@
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
 
-        // Ma'lumot turlarini to'g'rilaymiz
         data.buyPrice = parseFloat(data.buyPrice);
         data.manufactureYear = parseInt(data.manufactureYear);
 
-
-        // Dinamik URL va Method tanlash
         const url = editingTruckId
             ? `${API_BASE}/truck/update/${editingTruckId}`
             : `${API_BASE}/truck/create`;
@@ -1573,18 +1758,16 @@
         let method = 'POST';
 
         if (currentEditingUserId) {
-            // === Tahrirlash (UPDATE) ===
             method = 'PUT';
             url = `${API_BASE}/user/update/${currentEditingUserId}`;
 
-            // Parol bo‘sh bo‘lsa yubormaymiz
             if (!data.password) {
                 delete data.password;
             }
-            // userType update da kerak emas
+
             delete data.userType;
         } else {
-            // === Yangi qo‘shish (CREATE) ===
+
             const userType = data.userType;
             if (!userType) {
                 showNotify("Muommo mavjud!", 'Lavozim tanlang!');
@@ -1683,16 +1866,11 @@
             if (data.success) {
                 currentUser = data.object;
 
-                // Profil ma'lumotlarini to'ldirish
                 document.getElementById('profileName').textContent = currentUser.fullName;
                 document.getElementById('profileRole').textContent = currentUser.role;
                 document.getElementById('profilePhone').textContent = currentUser.phoneNumber;
                 document.getElementById('profileAddress').textContent = currentUser.address;
-
-                // Ismning birinchi harfini ikonka uchun olish
                 document.getElementById('userInitial').textContent = currentUser.fullName.charAt(0).toUpperCase();
-
-                // Sozlamalar bo'limidagi ma'lumotlarni ham yangilash (agar kerak bo'lsa)
                 const settingsDetails = document.getElementById('userDetails');
                 if (settingsDetails) {
                     settingsDetails.innerHTML = `
@@ -1711,8 +1889,6 @@
     function toggleProfileMenu() {
         const dropdown = document.getElementById('profileDropdown');
         dropdown.classList.toggle('hidden');
-
-        // Tashqariga bosganda yopilish mantig'i
         const closeMenu = (e) => {
             if (!e.target.closest('.relative')) {
                 dropdown.classList.add('hidden');
@@ -1734,30 +1910,21 @@
     }
 
     function showTab(tabName) {
-        // Barcha tablarni yashirish
         const tabs = document.querySelectorAll('.tab-content');
         tabs.forEach(tab => tab.classList.add('hidden'));
-
-        // Navigatsiya tugmalarini yangilash
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('bg-blue-600', 'text-white');
             btn.classList.add('bg-gray-100');
         });
-
-        // Tanlangan tabni ko'rsatish
         const selectedTab = document.getElementById(`${tabName}-tab`);
         if (selectedTab) {
             selectedTab.classList.remove('hidden');
         }
-
-        // Tanlangan tugmani aktiv qilish
         const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
         if (activeBtn) {
             activeBtn.classList.remove('bg-gray-100');
             activeBtn.classList.add('bg-blue-600', 'text-white');
         }
-
-        // Ma'lumotlarni yuklash
         if (tabName === 'dashboard') loadDashboard();
         else if (tabName === 'users') loadAllUsers();
         else if (tabName === 'trucks') loadTrucks();
@@ -1767,76 +1934,245 @@
 
     async function loadDashboard() {
         try {
-            const [tripsRes, trucksRes, driversRes, managersRes, economistsRes] = await Promise.all([
-                fetch(`${API_BASE}/trip/getAll`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                // fetch(`${API_BASE}/truck/list-truck`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                // fetch(`${API_BASE}/user/list-driver`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                // fetch(`${API_BASE}/user/list-manager`, {headers: {'Authorization': `Bearer ${authToken}`}}),
-                // fetch(`${API_BASE}/user/list-economist`, {headers: {'Authorization': `Bearer ${authToken}`}})
-            ]);
+            // Backend endpoint dan ma'lumotlarni olish
+            const response = await fetch(`${API_BASE}/dashboard/statistics`, {
+                headers: {'Authorization': `Bearer ${authToken}`}
+            });
 
-            const trips = await tripsRes.json();
-            const trucks = await trucksRes.json();
-            const drivers = await driversRes.json();
-            const managers = await managersRes.json();
-            const economists = await economistsRes.json();
+            const data = await response.json();
 
-            if (trips.success) {
-                document.getElementById('totalTrips').textContent = trips.object.length;
-                document.getElementById('inProgressTrips').textContent =
-                    trips.object.filter(t => t.tripStatus === 'IN_PROGRESS').length;
+            if (data.success) {
+                const stats = data.object;
+
+                // 1. Asosiy Statistika
+                document.getElementById('totalTrips').textContent = stats.totalTrips || 0;
+                document.getElementById('inProgressTrips').textContent = stats.inProgressTrips || 0;
+                document.getElementById('activeTrucks').textContent = stats.activeTrucks || 0;
+                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+
+                // 2. Moliyaviy Ko'rsatkichlar
+                document.getElementById('totalIncome').textContent = `$${(stats.totalIncome || 0).toLocaleString()}`;
+                document.getElementById('totalExpense').textContent = `$${(stats.totalExpense || 0).toLocaleString()}`;
+                document.getElementById('netProfit').textContent = `$${(stats.netProfit || 0).toLocaleString()}`;
+
+                // Xarajatlar tarkibi
+                document.getElementById('fuelExpense').textContent = `$${(stats.fuelExpense || 0).toLocaleString()}`;
+                document.getElementById('truckExpense').textContent = `$${(stats.truckExpense || 0).toLocaleString()}`;
+                document.getElementById('tripExpense').textContent = `$${(stats.tripExpense || 0).toLocaleString()}`;
+                document.getElementById('salaryExpense').textContent = `$${(stats.salaryExpense || 0).toLocaleString()}`;
+
+                // 3. Oylik Statistika
+                document.getElementById('monthCompletedTrips').textContent = stats.monthCompletedTrips || 0;
+                document.getElementById('monthIncome').textContent = `$${(stats.monthIncome || 0).toLocaleString()}`;
+                document.getElementById('monthExpense').textContent = `$${(stats.monthExpense || 0).toLocaleString()}`;
+
+                // 4. Bugungi Ko'rsatkichlar
+                document.getElementById('todayNewTrips').textContent = stats.todayNewTrips || 0;
+                document.getElementById('todayFuel').textContent = `${(stats.todayFuel || 0).toFixed(1)}L`;
+                document.getElementById('todayExpense').textContent = `$${(stats.todayExpense || 0).toLocaleString()}`;
+
+                // 5. O'rtacha Ko'rsatkichlar
+                document.getElementById('avgTripDuration').textContent = `${(stats.avgTripDuration || 0).toFixed(0)} kun`;
+                document.getElementById('avgTripIncome').textContent = `$${(stats.avgTripIncome || 0).toLocaleString()}`;
+                document.getElementById('avgFuelPerTrip').textContent = `${(stats.avgFuelPerTrip || 0).toFixed(1)}L`;
+
+                // 6. Qarzdorlik Holati
+                document.getElementById('unpaidSalaries').textContent = `$${(stats.unpaidSalaries || 0).toLocaleString()}`;
+                document.getElementById('paidSalaries').textContent = `$${(stats.paidSalaries || 0).toLocaleString()}`;
+                document.getElementById('totalDebt').textContent = `$${(stats.totalDebt || 0).toLocaleString()}`;
+                document.getElementById('unpaidDriversCount').textContent = stats.unpaidDriversCount || 0;
+
+                // 7. Top Haydovchilar
+                renderTopDrivers(stats.topDrivers || []);
+
+                // 8. Oxirgi Reyslar
+                renderRecentTrips(stats.recentTrips || []);
+
+                // 9. Mashinalar Holati
+                renderTruckStatus(stats.truckStatusList || []);
+
+                // 10. Qarzdorlar Ro'yxati
+                renderDebtorsList(stats.debtorsList || []);
+
+                // 11. Chart.js Grafik
+                renderFinanceChart(stats.chartData || {});
             }
-            if (trucks.success) {
-                document.getElementById('activeTrucks').textContent =
-                    trucks.object.filter(t => t.truckStatus === 'ACTIVE').length;
-            }
 
-            let totalUsers = 0;
-            if (drivers.success) totalUsers += drivers.object.length;
-            if (managers.success) totalUsers += managers.object.length;
-            if (economists.success) totalUsers += economists.object.length;
-            document.getElementById('totalUsers').textContent = totalUsers;
-            const ctx = document.getElementById('financeChart').getContext('2d');
-            myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jami daromad', 'Xarajatlar', 'Sof foyda'],
-                    datasets: [{
-                        label: 'Summa ($)',
-                        data: [18300, 6886, 7189], // Bu yerga API dan kelgan summalarni qo'ying
-                        backgroundColor: ['#22c55e', '#ef4444', '#3b82f6'],
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false // Konteynerga moslashishi uchun
-                }
-            });
-
-            // 2. Top Haydovchilar (Simulyatsiya)
-            const driversList = document.getElementById('topDriversList');
-            drivers.object.slice(0, 3).forEach((driver, index) => {
-                driversList.innerHTML += `
-            <div class="flex justify-between items-center p-2 border-b">
-                <span>${index + 1}. ${driver.fullName}</span>
-                <span class="font-bold text-green-600">$7189</span>
-            </div>`;
-            });
-            const truckList = document.getElementById('truckStatusList');
-            document.getElementById('topDriversList').innerHTML = ''; // Tozalash shart!
-            document.getElementById('truckStatusList').innerHTML = ''; // Tozalash shart!
-            trucks.object.slice(0, 4).forEach(truck => {
-                const statusColor = truck.truckStatus === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700';
-                truckList.innerHTML += `
-            <div class="flex justify-between p-2 border rounded-lg">
-                <div><p class="font-bold">${truck.truckNumber}</p><p class="text-xs text-gray-500">${truck.model}</p></div>
-                <span class="px-2 py-1 rounded text-xs h-fit ${statusColor}">${truck.truckStatus}</span>
-            </div>`;
-            });
         } catch (error) {
-            console.error('Error loading dashboard:', error);
+            console.error('Dashboard yuklashda xatolik:', error);
+            showNotify("Xatolik", "Dashboard ma'lumotlarini yuklashda xatolik", "error");
         }
+    }
+
+    // Top Haydovchilar
+    function renderTopDrivers(drivers) {
+        const container = document.getElementById('topDriversList');
+
+        if (drivers.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-center py-4">Ma\'lumot yo\'q</p>';
+            return;
+        }
+
+        container.innerHTML = drivers.slice(0, 5).map((driver, index) => `
+        <div class="flex justify-between items-center p-3 rounded-xl ${index === 0 ? 'bg-yellow-50 border border-yellow-100' : 'bg-gray-50'}">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full ${index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-gray-300'} flex items-center justify-center text-white font-bold">
+                    ${index + 1}
+                </div>
+                <div>
+                    <p class="font-bold text-gray-800 text-sm">${driver.fullName}</p>
+                    <p class="text-xs text-gray-500">${driver.completedTrips || 0} ta reys</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-green-600">${driver.totalIncome ? '$' + driver.totalIncome.toLocaleString() : '$0'}</p>
+                <p class="text-xs text-gray-400">Daromad</p>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    // Oxirgi Reyslar
+    function renderRecentTrips(trips) {
+        const container = document.getElementById('recentTripsList');
+
+        if (trips.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-center py-4">Ma\'lumot yo\'q</p>';
+            return;
+        }
+
+        container.innerHTML = trips.slice(0, 5).map(trip => {
+            const statusColor = trip.tripStatus === 'COMPLETED' ? 'text-green-600' : 'text-blue-600';
+            return `
+            <div class="py-3">
+                <div class="flex justify-between items-start mb-1">
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">${trip.routeFrom} → ${trip.routeTo}</p>
+                        <p class="text-xs text-gray-500">${trip.driverFullName || 'Noma\'lum'} • ${trip.truckNumber || '-'}</p>
+                    </div>
+                    <span class="text-xs font-bold ${statusColor} uppercase">${trip.tripStatus}</span>
+                </div>
+                <div class="flex justify-between items-center mt-2">
+                    <span class="text-xs text-gray-400">${trip.startedDate || '-'}</span>
+                    <span class="font-bold text-green-600 text-sm">${trip.totalIncomeUsd ? '$' + trip.totalIncomeUsd.toFixed(0) : '$0'}</span>
+                </div>
+            </div>
+        `;
+        }).join('');
+    }
+
+    // Mashinalar Holati
+    function renderTruckStatus(trucks) {
+        const container = document.getElementById('truckStatusList');
+
+        if (trucks.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-center py-4">Ma\'lumot yo\'q</p>';
+            return;
+        }
+
+        container.innerHTML = trucks.slice(0, 5).map(truck => {
+            const statusConfig = {
+                'ACTIVE': { label: 'Faol', color: 'bg-green-100 text-green-700 border-green-200' },
+                'REPAIR': { label: 'Ta\'mirda', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+                'INACTIVE': { label: 'Faol emas', color: 'bg-gray-100 text-gray-700 border-gray-200' }
+            };
+            const status = statusConfig[truck.truckStatus] || statusConfig['INACTIVE'];
+
+            return `
+            <div class="flex justify-between items-center p-3 border rounded-lg hover:shadow-sm transition">
+                <div>
+                    <p class="font-bold text-gray-800">${truck.truckNumber}</p>
+                    <p class="text-xs text-gray-500">${truck.modelName} (${truck.manufactureYear})</p>
+                </div>
+                <span class="px-3 py-1 rounded-lg text-xs font-bold border ${status.color}">${status.label}</span>
+            </div>
+        `;
+        }).join('');
+    }
+
+    // Qarzdorlar Ro'yxati
+    function renderDebtorsList(debtors) {
+        const container = document.getElementById('debtorsList');
+
+        if (debtors.length === 0) {
+            container.innerHTML = '<p class="text-gray-400 text-center py-4 bg-gray-50 rounded-lg">Qarzdorlar yo\'q 🎉</p>';
+            return;
+        }
+
+        container.innerHTML = `
+        <div class="bg-gray-50 rounded-xl p-4">
+            <h4 class="text-sm font-bold text-gray-700 mb-3">Qarzdor haydovchilar:</h4>
+            <div class="space-y-2">
+                ${debtors.map(debtor => `
+                    <div class="flex justify-between items-center p-2 bg-white rounded-lg">
+                        <span class="text-sm text-gray-700 font-medium">${debtor.fullName}</span>
+                        <span class="text-sm font-bold text-red-600">-$${debtor.debt.toLocaleString()}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    }
+
+    // Chart.js Grafik
+    let financeChart = null;
+
+    function renderFinanceChart(chartData) {
+        const ctx = document.getElementById('financeChart').getContext('2d');
+
+        if (financeChart) {
+            financeChart.destroy();
+        }
+
+        financeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Daromad', 'Yoqilgi', 'Tamirlash', 'Yol haqi', 'Oyliklar', 'Foyda'],
+                    datasets: [{
+            label: 'Summa (USD)',
+            data: [
+                chartData.totalIncome || 0,
+                chartData.fuelExpense || 0,
+                chartData.truckExpense || 0,
+                chartData.tripExpense || 0,
+                chartData.salaryExpense || 0,
+                chartData.netProfit || 0
+            ],
+            backgroundColor: [
+                '#10b981',
+                '#f97316',
+                '#8b5cf6',
+                '#ec4899',
+                '#3b82f6',
+                '#06b6d4'
+            ],
+            borderRadius: 8,
+            borderWidth: 0
+        }]
+    },
+        options: {
+            responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                        grid: {
+                        color: '#f3f4f6'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
     }
 
     async function loadAllUsers() {
@@ -1931,7 +2267,6 @@
 `).join('');
     }
 
-    // User Modal Functions
     function openAddUserModal() {
         // Modalni ochamiz
         document.getElementById('addUserModal').classList.add('active');
@@ -1953,10 +2288,8 @@
     }
 
     async function editUser(userId) {
-        // allUsers ob'ektidan foydalanuvchini topamiz (drivers, managers, economists)
         let user = null;
         let role = null;
-
         const roleMap = {
             drivers: 'DRIVER',
             managers: 'MANAGER',
@@ -1975,58 +2308,35 @@
             showNotify("Muommo", 'Foydalanuvchi topilmadi!');
             return;
         }
-
-        // O‘zgaruvchilarga saqlaymiz
         currentEditingUserId = userId;
         currentEditingUserRole = role;
-
-        // Modalni ochamiz
         document.getElementById('addUserModal').classList.add('active');
-
-        // Sarlavhani o‘zgartiramiz
         document.querySelector('#addUserModal h3').innerText = 'Foydalanuvchi maʼlumotlarini tahrirlash';
-
-        // Lavozimni tanlaymiz va disable qilamiz (o‘zgartirish taqiqlanadi)
         const userTypeSelect = document.querySelector('#addUserForm [name="userType"]');
         userTypeSelect.value = role;
         userTypeSelect.disabled = true;
-
-        // Formani to‘ldiramiz (mavjud fieldlar bo‘yicha)
         document.querySelector('#addUserForm [name="fullName"]').value = user.fullName || '';
         document.querySelector('#addUserForm [name="phoneNumber"]').value = user.phoneNumber || '';
         document.querySelector('#addUserForm [name="passportNumber"]').value = user.passportNumber || '';
         document.querySelector('#addUserForm [name="pnfl"]').value = user.pnfl || '';
         document.querySelector('#addUserForm [name="address"]').value = user.address || '';
         document.querySelector('#addUserForm [name="password"]').value = ''; // parol bo‘sh qoldiriladi
-
-        // Tug‘ilgan sana va ishga kirgan sana listda yo‘q → bo‘sh qoldiramiz
-        // Agar backendda bu fieldlar majburiy bo‘lmasa, muammo bo‘lmaydi
         document.querySelector('#addUserForm [name="brithDate"]').value = user.brithDate || '';
         document.querySelector('#addUserForm [name="hireDate"]').value = user.hireDate || '';
 
     }
 
     function closeAddUserModal() {
-        // Modalni yopamiz
         document.getElementById('addUserModal').classList.remove('active');
-
-        // Formani tozalaymiz (barcha input, select, textarea bo'sh bo'ladi)
         document.getElementById('addUserForm').reset();
-
-        // Sarlavhani asl holatga qaytaramiz
         document.querySelector('#addUserModal h3').innerText = "Yangi foydalanuvchi qo'shish";
-
-        // Lavozim tanlovini ochamiz va bo'sh qilamiz
         const userTypeSelect = document.querySelector('#addUserForm [name="userType"]');
         userTypeSelect.disabled = false;   // tanlash ochiladi
         userTypeSelect.value = "";         // tanlov tozalanadi
-
-        // Edit rejimi o'chiriladi
         currentEditingUserId = null;
         currentEditingUserRole = null;
     }
 
-    // Truck Modal Functions
     function openAddTruckModal() {
         editingTruckId = null; // Tahrirlash rejimidan chiqish
         const modal = document.getElementById('addTruckModal');
@@ -2037,14 +2347,12 @@
             return;
         }
 
-        form.reset(); // Formani tozalash
+        form.reset();
         document.querySelector('#addTruckModal h3').innerText = "Yangi mashina qo'shish";
 
-        // MUHIM: Har ikkala klassni ham boshqaramiz
         modal.classList.remove('hidden');
         modal.classList.add('show');
 
-        // Agar CSS-da hali ham muammo bo'lsa, majburiy inline style beramiz
         modal.style.display = 'flex';
     }
 
@@ -2052,31 +2360,23 @@
     let isEditMode = false;
     let currentBalanceId = null;
 
-    // Modalni ochish funksiyasi
     function openSalaryModal(userId, tripId = null, existingData = null) {
         const modal = document.getElementById('salaryModal');
         const form = document.getElementById('salaryForm');
-
-        // Har safar ochilganda formani va holatni tozalash
         form.reset();
         isEditMode = false;
         currentBalanceId = null;
-
-        // Yashirin maydonlarga qiymat berish
         document.getElementById('balanceUserId').value = userId;
         document.getElementById('balanceTripId').value = tripId || "";
-
-        // Sanani bugungi kunga sozlash
         document.getElementById('operationDate').valueAsDate = new Date();
         const submitBtn = document.querySelector('#salaryForm button[type="submit"]');
         if (existingData) {
-            // TAHRIRLASH REJIMI (Agar ma'lumot uzatilsa)
             isEditMode = true;
             currentBalanceId = existingData.id;
             document.getElementById('balanceAmountUsd').value = existingData.amountUsd;
             const typeSelect = document.getElementById('paymentType');
             typeSelect.value = existingData.paymentType;
-            typeSelect.disabled = true; // Tahrirlashda o'zgartirib bo'lmaydi
+            typeSelect.disabled = true;
             document.getElementById('balanceDescription').value = existingData.description;
             document.getElementById('operationDate').value = existingData.operationDate;
 
@@ -2084,38 +2384,32 @@
             document.getElementById('isPaid').checked = Boolean(paidStatus);
 
             document.querySelector('#salaryModal h3').innerText = "Balansni tahrirlash";
-            typeSelect.style.background = "#f1f5f9"; // Vizual "yopiq" ekanini bildirish
+            typeSelect.style.background = "#f1f5f9";
             document.querySelector('#salaryModal h3').innerText = "Balansni tahrirlash";
-            submitBtn.innerText = "O'zgarishlarni saqlash"; // Tahrirlash rejimi uchun
-            submitBtn.classList.replace('btn-success', 'btn-primary'); // Rangini ham o'zgartirish mumkin
+            submitBtn.innerText = "O'zgarishlarni saqlash";
+            submitBtn.classList.replace('btn-success', 'btn-primary');
         } else {
             isEditMode = false;
             document.querySelector('#salaryModal h3').innerText = "Oylik / To'lov yozish";
-            submitBtn.innerText = "Saqlash"; // Yangi qo'shish rejimi uchun
+            submitBtn.innerText = "Saqlash";
             submitBtn.classList.replace('btn-primary', 'btn-success');
             const typeSelect = document.getElementById('paymentType');
-            typeSelect.disabled = false; // Yangi qo'shishda ochiq bo'ladi
+            typeSelect.disabled = false;
             typeSelect.style.background = "#ffffff";
             document.getElementById('operationDate').valueAsDate = new Date();
-            // YANGI QO'SHISH REJIMI
             document.getElementById('isPaid').checked = false; // Yangi qo'shishda bo'sh bo'ladi
             document.querySelector('#salaryModal h3').innerText = "Oylik / To'lov yozish";
         }
-        // Modalni ko'rsatish
         modal.classList.remove('hidden');
     }
 
-    // Formani yuborish (Submit)
     document.getElementById('salaryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // userId raqam ko'rinishida bo'lishi shart
         const userId = parseInt(document.getElementById('balanceUserId').value);
         const tripIdValue = document.getElementById('balanceTripId').value;
 
         const data = {
             userId: userId,
-            // tripId bo'sh bo'lsa yoki 0 bo'lsa null yuboramiz (Backendda ixtiyoriy)
             tripId: (tripIdValue && tripIdValue !== "0") ? parseInt(tripIdValue) : null,
             amountUsd: parseFloat(document.getElementById('balanceAmountUsd').value),
             paymentType: document.getElementById('paymentType').value,
@@ -2123,15 +2417,12 @@
             operationDate: document.getElementById('operationDate').value,
             isPaid: document.getElementById('isPaid').checked
         };
-
-        // Tahrirlash yoki yangi qo'shish rejimini URL va Method bo'yicha aniqlash
         const url = isEditMode
             ? `${API_BASE}/user-balance/update/${currentBalanceId}`
             : `${API_BASE}/user-balance/add-balance`;
 
         const method = isEditMode ? 'PUT' : 'POST';
 
-        // Tugmani vaqtincha faolsizlantirish (Double-click oldini olish)
         const submitBtn = e.target.querySelector('button[type="submit"]');
         if (submitBtn) submitBtn.disabled = true;
 
@@ -2153,22 +2444,14 @@
                     isEditMode ? "Ma'lumot yangilandi!" : "To'lov muvaffaqiyatli qo'shildi!",
                     "success"
                 );
-
-                // Modalni yopish va formani tozalash
                 closeSalaryModal();
-
-                // Ma'lumotlarni qayta yuklash (UI yangilash)
                 if (typeof viewUser === "function") {
                     await viewUser(userId);
                 }
-
-                // Agar moliya ro'yxati alohida bo'lsa, uni ham yangilash
                 if (typeof updateFinanceDisplay === "function") {
                     updateFinanceDisplay(userId);
                 }
-
             } else {
-                // Backend validatsiya xatolarini ko'rsatish
                 showNotify("Xato!", result.message || "Ma'lumot saqlanmadi", "error");
             }
         } catch (error) {
@@ -2182,18 +2465,14 @@
     function closeSalaryModal() {
         const modal = document.getElementById('salaryModal');
         modal.classList.add('hidden');
-
-        // Formani tozalash
         document.getElementById('salaryForm').reset();
-
-        // Yashirin ID larni ham qo'lda tozalash (reset bularni doim ham tozalamaydi)
         document.getElementById('balanceUserId').value = "";
         document.getElementById('balanceTripId').value = "";
         currentBalanceId = null;
         isEditMode = false;
     }
 
-    let editingTruckId = null; // Tahrirlanayotgan mashina ID sini saqlash uchun
+    let editingTruckId = null;
 
     async function editTruck(id) {
         try {
@@ -2203,26 +2482,19 @@
 
             if (!response.ok) throw new Error("Serverdan ma'lumot olishda xatolik!");
 
-            const res = await response.json(); // Kelgan JSON (message, object, success)
+            const res = await response.json();
 
             if (res.success && res.object) {
-                const truck = res.object; // Ma'lumot aynan 'object' ichida
-                editingTruckId = id; // Tahrirlanayotgan ID ni saqlab qo'yamiz
-
+                const truck = res.object;
+                editingTruckId = id;
                 const form = document.getElementById('addTruckForm');
-
-                // Modal sarlavhasini o'zgartirish
                 document.querySelector('#addTruckModal h3').innerText = "Mashina ma'lumotlarini tahrirlash";
-
-                // Formani to'ldirish
                 form.truckNumber.value = truck.truckNumber || '';
                 form.modelName.value = truck.modelName || '';
                 form.manufactureYear.value = truck.manufactureYear || '';
                 form.buyPrice.value = truck.buyPrice || '';
-                form.buyDate.value = truck.buyDate || ''; // "2021-05-14" formatida bo'lsa, date input buni taniydi
+                form.buyDate.value = truck.buyDate || '';
                 form.truckStatus.value = truck.truckStatus || 'ACTIVE';
-
-                // Modalni ochish (Tailwind modal uchun)
                 document.getElementById('addTruckModal').classList.add('show');
                 document.getElementById('addTruckModal').style.display = 'flex';
             } else {
@@ -2234,8 +2506,6 @@
             showNotify("Xatolik", "Ma'lumotlarni yuklab bo'lmadi.");
         }
     }
-
-
     function closeAddTruckModal() {
         const modal = document.getElementById('addTruckModal');
         const form = document.getElementById('addTruckForm');
@@ -2245,16 +2515,10 @@
 
         document.querySelector('#addTruckModal h3').innerText = "Yangi mashina qo'shish";
 
-        // 4. Modalni yashirish
-        // Agar CSS-da .modal { display: none } bo'lsa:
         modal.style.display = 'none';
-
-        // Agar Tailwind 'hidden' klassini ishlatsangiz:
         modal.classList.add('hidden');
-        modal.classList.remove('flex', 'show'); // Ochishda qo'shilgan klasslarni olib tashlaymiz
+        modal.classList.remove('flex', 'show');
     }
-
-    // Modaldan tashqariga (kulrang fonga) bosilganda yopish mantiqi
     window.onclick = function (event) {
         const modal = document.getElementById('addTruckModal');
         if (event.target === modal) {
@@ -2276,8 +2540,6 @@
 
             if (res.success && res.object) {
                 const truck = res.object;
-
-                // w-full max-w-none klasslari orqali kenglikni ochamiz
                 container.innerHTML = `
                 <div class="w-full min-h-screen bg-gray-50 p-4 md:p-8">
                     <div class="w-full max-w-none mx-auto">
@@ -2387,7 +2649,6 @@
         const container = document.getElementById('completedTripsList');
         if (!container) return;
 
-        // Loading... (UI o'zgarmadi)
         container.innerHTML = `<div class="p-6 text-center text-gray-400 italic bg-gray-50 rounded-xl"><div class="animate-pulse">Yuklanmoqda...</div></div>`;
 
         try {
@@ -2399,7 +2660,6 @@
 
             const data = await response.json();
 
-            // 1. API-dan kelgan massivni olish
             const allTrips = data.object || [];
 
             const truckTrips = allTrips;
@@ -2456,7 +2716,6 @@
     }
 
     async function openTripFromTruck(tripId, truckId) {
-        // truckId ni global o'zgaruvchiga saqlash (ortga qaytish uchun)
         window.lastViewedTruckId = truckId;
 
         const trucksTab = document.getElementById('trucks-tab');
@@ -2466,15 +2725,11 @@
         if (tripsTab) {
             tripsTab.classList.remove('hidden');
 
-            // Reys detallarini yuklash
             await showTripDetails(tripId);
-
-            // Navigatsiya tugmasini yangilash
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-blue-600', 'text-white');
                 btn.classList.add('bg-gray-100');
             });
-
             const tripsBtn = document.querySelector('[data-tab="trips"]');
             if (tripsBtn) {
                 tripsBtn.classList.remove('bg-gray-100');
@@ -2486,7 +2741,6 @@
     function backToTruckList() {
         const tabContent = document.getElementById('trucks-tab');
 
-        // 1. Tabni asl holatiga (Qidiruv paneli va ro'yxat konteyneri bilan) qaytaramiz
         tabContent.innerHTML = `
         <div class="bg-white rounded-xl shadow-lg p-6">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
@@ -2511,8 +2765,6 @@
                 </div>
         </div>
     `;
-
-        // 2. Mashinalar ro'yxatini qayta yuklovchi funksiyangizni chaqiring
         loadTrucks();
     }
 
@@ -2590,17 +2842,12 @@
         document.getElementById('fuelModal').classList.remove('hidden');
     }
 
-    // Formani yuborish
     document.getElementById('expenseForm').addEventListener('submit', async function (e) {
         e.preventDefault();
-
-        // Tugmani bloklash (Double click oldini olish)
         const submitBtn = e.target.querySelector('button[type="submit"]');
         const originalBtnText = submitBtn.innerText;
         submitBtn.disabled = true;
         submitBtn.innerText = "Saqlanmoqda...";
-
-        // Ma'lumotlarni yig'ish (Sizning fuelForm uslubingizda)
         const tripId = parseInt(document.getElementById('tripIdField').value);
         const type = document.getElementById('type').value;
         const amountLocal = parseFloat(document.getElementById('amountLocal').value);
@@ -2633,11 +2880,7 @@
 
             if (response.ok || data.success) {
                 showNotify("Muvaffaqiyatli!", "Xarajat muvaffaqiyatli qo‘shildi!");
-
-                // Formani tozalash va modalni yopish
                 closeModal();
-
-                // Agar asosiy oynadagi ma'lumotlarni yangilash funksiyasi bo'lsa
                 if (typeof showTripDetails === "function") {
                     showTripDetails(tripId);
                 }
@@ -2648,13 +2891,10 @@
             console.error("POST TripExpense xatolik:", error);
             showNotify("Muammo mavjud!", "Server bilan bog'lanishda xatolik yuz berdi!", "error");
         } finally {
-            // Har qanday holatda ham tugmani qayta aktivlashtirish
             submitBtn.disabled = false;
             submitBtn.innerText = originalBtnText;
         }
     });
-
-    // Modalni yopish
     function closeFuelModal() {
         document.getElementById('fuelForm').reset();
         document.getElementById('fuelModal').classList.add('hidden');
@@ -2667,7 +2907,6 @@
         modal.classList.remove('hidden');
     }
 
-    // Modalni yopish va tozalash
     function closeModal() {
         document.getElementById('expenseModal').classList.add('hidden');
         document.getElementById('expenseForm').reset();
@@ -2675,7 +2914,6 @@
 
     async function viewUser(userId) {
         try {
-            // 1. Foydalanuvchi ma'lumotlarini olish
             const response = await fetch(`${API_BASE}/user/${userId}`, {
                 headers: {'Authorization': `Bearer ${authToken}`}
             });
@@ -2686,7 +2924,6 @@
 
             const user = result.object;
 
-            // 2. Balans statistikalarini olish
             let balance = {
                 totalSalary: 0,
                 totalPersonal: 0,
@@ -2708,7 +2945,6 @@
                 console.error('Balansni yuklashda xatolik:', balanceError);
             }
 
-            // UI ni tozalash
             document.getElementById('usersHeader')?.classList.add('hidden');
             document.getElementById('userTypeTabs')?.classList.add('hidden');
             document.getElementById('usersList')?.classList.add('hidden');
@@ -2717,8 +2953,6 @@
             detailsSection.classList.remove('hidden');
 
             let roleTitle = user.role === 'DRIVER' ? 'Haydovchi' : 'Xodim';
-
-            // HTML kontentini joylash
             detailsSection.innerHTML = `
     <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 20px; font-family: 'Outfit', sans-serif;">
 
@@ -2824,8 +3058,6 @@
 </div>
 </div>
     `;
-
-            // DEFAULT HOLATDA: Oyliklarni yuklaymiz (Reyslarni emas)
             toggleFinanceView(user.id);
 
         } catch (error) {
@@ -2833,8 +3065,7 @@
         }
     }
 
-    // REYSLARNI KO'RSATISH
-    let allUserTrips = []; // Reyslarni vaqtincha saqlash uchun
+    let allUserTrips = [];
 
     async function loadTruckExpenses(truckId) {
         try {
@@ -2845,13 +3076,9 @@
 
             if (data.success && data.object) {
                 const {list, totalAmountByTrip, totalAmountByGarage} = data.object;
-
-                // Reysdagi xarajatlar
                 const tripExpenses = list.filter(exp => exp.tripId !== null);
                 renderExpenseItems('tripExpensesList', tripExpenses);
                 document.getElementById('tripTotalUsd').textContent = `$${(totalAmountByTrip || 0).toFixed(2)}`;
-
-                // Garajdagi xarajatlar
                 const garageExpenses = list.filter(exp => exp.tripId === null);
                 renderExpenseItems('garageExpensesList', garageExpenses);
                 document.getElementById('garageTotalUsd').textContent = `$${(totalAmountByGarage || 0).toFixed(2)}`;
@@ -2863,8 +3090,6 @@
 
     function renderExpenseItems(containerId, list) {
         const container = document.getElementById(containerId);
-
-        // Expense type nomlarini o'zbekchaga o'girish
         const expenseTypeNames = {
             'TIRE': 'Balon',
             'OIL_CHANGE': 'Moy almashtirish',
@@ -2883,7 +3108,6 @@
             container.innerHTML = `<div class="p-8 text-center text-gray-400 italic">Ma'lumot topilmadi</div>`;
             return;
         }
-
         container.innerHTML = list.map(exp => `
         <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl group hover:bg-white border border-transparent hover:border-blue-100 transition-all shadow-sm mb-3">
             <div class="flex flex-col">
@@ -2910,16 +3134,11 @@
         const container = document.getElementById('dynamicListContainer');
         const buttonsContainer = document.getElementById('actionButtonsContainer');
         const itemsSelect = document.getElementById('itemsPerPage');
-
-        // Sarlavhani yangilash
         title.innerText = "Bajarilgan Reyslar";
 
-        // Pagination select-ni yashirish
         if (itemsSelect) {
             itemsSelect.style.display = 'none';
         }
-
-        // Moliya tugmalari o'rniga faqat Reys filtrlarini chizish
         buttonsContainer.innerHTML = `
         <button onclick="filterTrips('ALL', this)" class="trip-filter-btn" style="padding: 10px 18px; border-radius: 10px; border: none; background: #1e293b; color: white; font-weight: 700; font-size: 11px; cursor: pointer; transition: 0.2s; opacity: 1;">BARCHASI</button>
         <button onclick="filterTrips('COMPLETED', this)" class="trip-filter-btn" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #10b981; background: #f0fdf4; color: #166534; font-weight: 700; font-size: 11px; cursor: pointer; transition: 0.2s; opacity: 0.6;">TUGALLANGAN</button>
@@ -2934,7 +3153,6 @@
             });
             const result = await response.json();
 
-            // Backend formatiga qarab ma'lumotni olish
             allUserTrips = result.object || result || [];
 
             renderTripsList(allUserTrips);
@@ -2945,15 +3163,12 @@
     }
 
     function filterTrips(status, btn) {
-        // Barcha filter tugmalarini xiralashtirish
         document.querySelectorAll('.trip-filter-btn').forEach(b => {
             b.style.opacity = "0.6";
         });
 
-        // Tanlangan tugmani yorqin qilish
         btn.style.opacity = "1";
 
-        // Filtrlash mantiqi
         const filtered = status === 'ALL' ? allUserTrips : allUserTrips.filter(t => t.tripStatus === status);
         renderTripsList(filtered);
     }
@@ -3008,8 +3223,6 @@
         }
     }
 
-    // OYLIK VA MOLIYAVIY MA'LUMOTLARNI KO'RSATISH
-    // 1. Dastlab ma'lumotni saqlash uchun o'zgaruvchi
     let currentFinanceData = [];
 
     async function toggleFinanceView(userId, filterType = 'ALL') {
@@ -3018,12 +3231,9 @@
         const buttonsContainer = document.getElementById('actionButtonsContainer');
         const itemsSelect = document.getElementById('itemsPerPage');
 
-        // 1. Yashirilgan elementlarni qayta ko'rsatish
         if (itemsSelect) {
             itemsSelect.style.display = 'block'; // Paginationni ko'rsatish
         }
-
-        // 2. Reys filtrlari o'rniga Moliya tugmalarini qaytarish
         if (buttonsContainer) {
             buttonsContainer.innerHTML = `
             <button onclick="toggleFinanceView(${userId}, 'INCOME')" style="padding: 10px 15px; border-radius: 10px; border: 1px solid #10b981; background: #f0fdf4; color: #166534; font-weight: 600; cursor: pointer; transition: 0.2s;">➕ Kirimlar</button>
@@ -3040,7 +3250,6 @@
         `;
         }
 
-        // Sarlavhani tanlangan filtrga qarab o'zgartiramiz
         const titles = {
             'ALL': 'Moliya Tarixi',
             'INCOME': 'Kirimlar Tarixi',
@@ -3137,14 +3346,13 @@
         }).join('');
     }
 
-    // O'chirish funksiyasi namunasi
     async function deleteFinanceItem(id, userId) {
         Swal.fire({
             title: 'Ishonchingiz komilmi?',
             text: "Ushbu moliya yozuvini o'chirishni tasdiqlaysizmi? Uni qayta tiklab bo'lmasligi mumkin!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444', // O'chirish bo'lgani uchun qizilroq rang
+            confirmButtonColor: '#ef4444',
             cancelButtonColor: '#64748b',
             confirmButtonText: 'Ha, o‘chirilsin!',
             cancelButtonText: 'Bekor qilish'
@@ -3154,7 +3362,6 @@
 
             let response;
 
-            // 🔹 1. Tarmoq so'rovi (Fetch)
             try {
                 response = await fetch(`${API_BASE}/user-balance/delete/${id}`, {
                     method: 'DELETE',
@@ -3169,7 +3376,6 @@
                 return;
             }
 
-            // 🔹 2. HTTP statusni tekshirish
             if (!response.ok) {
                 showNotify(
                     "Xatolik!",
@@ -3179,17 +3385,15 @@
                 return;
             }
 
-            // 🔹 3. JSON parsing (Xavfsiz usulda)
             let data;
             try {
                 const text = await response.text();
                 data = text ? JSON.parse(text) : {success: true};
             } catch (jsonError) {
                 console.warn("JSON parse xatosi:", jsonError);
-                data = {success: true}; // Agar bo'sh qaytsa, muvaffaqiyatli deb hisoblaymiz
+                data = {success: true};
             }
 
-            // 🔹 4. Biznes mantiq (data.success)
             if (data.success) {
                 showNotify(
                     "O'chirildi!",
@@ -3197,7 +3401,6 @@
                     'success'
                 );
 
-                // 🔹 5. UI ni yangilash
                 try {
                     // Ro'yxatni qayta yuklash
                     toggleFinanceView(userId);
@@ -3215,7 +3418,6 @@
         });
     }
 
-    // HISOBOT YUKLASH FUNKSIYASI (AXLOQIY)
     async function downloadFinanceReport(userId) {
         try {
             const response = await fetch(`${API_BASE}/user-balance/get-report-pdf/${userId}`, {
@@ -3233,8 +3435,6 @@
             link.setAttribute('download', `hisobot_${userId}.pdf`);
             document.body.appendChild(link);
             link.click();
-
-            // Tozalash
             window.URL.revokeObjectURL(url);
             link.remove();
 
@@ -3257,7 +3457,6 @@
         if (usersList) usersList.classList.remove('hidden');
     }
 
-    // Trip Modal Functions
     function openAddTripModal() {
         loadTripFormData();
         document.getElementById('addTripModal').classList.add('active');
@@ -3313,8 +3512,6 @@
                     'COMPLETED': 'Tugatilgan'
                 };
 
-                // F.I.O dan faqat ismni ajratib olish (2-so'zni oladi)
-                // Agar F.I.O bo'sh bo'lsa yoki bitta so'z bo'lsa, borini chiqaradi
                 const firstName = trip.fullName ? (trip.fullName.split(' ')[1] || trip.fullName.split(' ')[0]) : "Noma'lum";
 
                 return `
@@ -3380,7 +3577,6 @@
         }
     }
 
-    // Trip Details (INLINE, MODAL EMAS)
     async function showTripDetails(tripId) {
         try {
             const response = await fetch(`${API_BASE}/trip/${tripId}`, {
@@ -3391,12 +3587,8 @@
             if (!data.success) return;
 
             const trip = data.object;
-
-            // Status COMPLETED bo'lsa tahrirlash bloklanadi
             const isLocked = trip.tripStatus === 'COMPLETED';
             const hideIfLocked = isLocked ? 'hidden' : '';
-
-            // Statuslarni o'zbekchalashtirish va rang berish
             const statusMap = {
                 'IN_PROGRESS': {label: 'Jarayonda', class: 'bg-green-100 text-green-700 ring-green-200'},
                 'COMPLETED': {label: 'Tugatilgan', class: 'bg-blue-100 text-blue-700 ring-blue-200'}
@@ -3783,8 +3975,6 @@
         }
     }
 
-    //trip expense
-    // 1. Modalni ochish (Ochilganda ham tozalanadi)
     function addTruckExpense(tripId, truckId) {
         const form = document.getElementById('truckExpenseForm');
         form.reset();
@@ -3811,7 +4001,6 @@
         const rawTripId = document.getElementById('teTripId').value;
         const truckId = document.getElementById('teTruckId').value;
 
-        // tripId ni tekshirish: agar bo'sh string bo'lsa null qilamiz, aks holda raqamga o'giramiz
         const tripId = (rawTripId === "" || rawTripId === "null") ? null : parseInt(rawTripId);
 
         if (!amountUsd || amountUsd <= 0) {
@@ -3846,13 +4035,9 @@
                 document.getElementById('truckExpenseForm').reset();
                 closeTruckExpenseModal();
                 showNotify("Muvaffaqiyat", "Xarajat saqlandi", "success");
-
-                // Mantiqni tekshirish:
                 if (tripId !== null) {
-                    // Agar reysga tegishli bo'lsa, reys detallarini yangilaymiz
                     showTripDetails(tripId);
                 } else {
-                    // Agar garaj xarajati (null) bo'lsa, mashina sahifasini yangilaymiz
                     viewTruck(truckId);
                 }
             } else {
@@ -3899,20 +4084,14 @@
 
                 const tripData = getData.object;
 
-                // STATUSNI O'ZGARTIRISH
                 tripData.tripStatus = nextStatus;
 
-                // SANANI O'ZLASHTIRISH
                 if (isFinishing) {
-                    // Bugungi sanani ISO formatda (YYYY-MM-DD) berish
-                    // Agar vaqt ham kerak bo'lsa: new Date().toISOString()
                     tripData.finishedDate = new Date().toISOString().split('T')[0];
                 } else {
-                    // Agar reys qaytadan ochilsa, tugash sanasini tozalash kerak bo'lishi mumkin
                     tripData.finishedDate = null;
                 }
 
-                // 2. Yangilangan ob'ektni PUT qilish
                 const response = await fetch(`${API_BASE}/trip/${tripId}`, {
                     method: 'PUT',
                     headers: {
@@ -3925,7 +4104,6 @@
                 const resData = await response.json();
 
                 if (resData.success) {
-                    // UI ni yangilash (Eski funksiyangiz)
                     if (typeof showTripDetails === "function") showTripDetails(tripId);
 
                     showNotify(
@@ -3958,8 +4136,6 @@
             if (!result.isConfirmed) return;
 
             let response;
-
-            // 🔹 1. Faqat FETCH uchun try/catch
             try {
                 response = await fetch(`${API_BASE}/fuel/delete/${fuelId}`, {
                     method: 'DELETE',
@@ -3973,8 +4149,6 @@
                 showNotify("Tarmoq xatosi!", "Server bilan aloqa yo'q.", 'error');
                 return;
             }
-
-            // 🔹 2. HTTP status tekshirish
             if (!response.ok) {
                 showNotify(
                     "Xatolik!",
@@ -3983,8 +4157,6 @@
                 );
                 return;
             }
-
-            // 🔹 3. JSON parsing (xavfsiz)
             let data = {success: true};
 
             try {
@@ -3994,15 +4166,12 @@
                 console.warn("JSON parse xatosi:", jsonError);
             }
 
-            // 🔹 4. Business logic
             if (data.success) {
                 showNotify(
                     "O'chirildi!",
                     data.message || "Yoqilg'i xarajati muvaffaqiyatli o'chirildi.",
                     'success'
                 );
-
-                // 🔹 5. UI yangilash (xavfsiz)
                 try {
                     showTripDetails(tripId);
                 } catch (uiError) {
@@ -4018,8 +4187,6 @@
             }
         });
     }
-
-    // 1. MASHINA TA'MIRLASH XARAJATINI O'CHIRISH (truck-expense)
     async function deleteTruckExpense(expenseId, tripId) {
         Swal.fire({
             title: 'Ishonchingiz komilmi?',
@@ -4070,7 +4237,6 @@
         });
     }
 
-    // 2. YO'L XARAJATINI O'CHIRISH (trip-expense)
     async function deleteTripExpense(expenseId, tripId) {
         Swal.fire({
             title: 'Ishonchingiz komilmi?',
@@ -4124,21 +4290,16 @@
     function closeTripDetails() {
         const detailsSection = document.getElementById('tripDetailsSection');
         const tripsList = document.getElementById('tripsList');
-
-        // Agar mashinadan kelgan bo'lsa, mashinaga qaytish
         if (window.lastViewedTruckId) {
             detailsSection.classList.add('hidden');
             showTab('trucks');
             viewTruck(window.lastViewedTruckId);
             window.lastViewedTruckId = null;
         } else {
-            // Aks holda trips listiga qaytish
             detailsSection.classList.add('hidden');
             if (tripsList) tripsList.classList.remove('hidden');
         }
     }
-
-    // Clos modals on outside click
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
@@ -4147,49 +4308,35 @@
         });
     });
     function switchSettingsSection(sectionName) {
-        // Barcha section-larni yashirish
         document.querySelectorAll('.settings-section-content').forEach(section => {
             section.classList.add('hidden');
         });
-
-        // Barcha navigation tugmalaridan active klassni olib tashlash
         document.querySelectorAll('.settings-nav-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-
-        // Tanlangan section-ni ko'rsatish
         const targetSection = document.getElementById(`settings-${sectionName}`);
         if (targetSection) {
             targetSection.classList.remove('hidden');
         }
-
-        // Tanlangan tugmani active qilish
         event.target.closest('.settings-nav-btn').classList.add('active');
     }
 
-    // Settings ma'lumotlarini yuklash (yangilangan)
     async function loadSettingsData() {
         if (!currentUser) {
             await loadCurrentUser();
         }
 
-        // Ism va Familiyani ajratish
         const nameParts = currentUser.fullName?.split(' ') || ['', ''];
         document.getElementById('set_name').value = nameParts[0] || '';
         document.getElementById('set_surname').value = nameParts.slice(1).join(' ') || '';
 
-        // Telefon
         document.getElementById('set_phone').value = currentUser.phoneNumber || '';
-
-        // Manzil (Read-only)
         document.getElementById('set_address').value = currentUser.address || '-';
 
-        // Lavozim
         const roleElement = document.getElementById('set_role');
         if (roleElement) {
             roleElement.textContent = currentUser.role || 'USER';
 
-            // Lavozimga qarab rang berish
             const roleColors = {
                 'DRIVER': 'bg-blue-100 text-blue-700',
                 'MANAGER': 'bg-purple-100 text-purple-700',
@@ -4199,7 +4346,6 @@
             roleElement.className = `px-4 py-2 rounded-lg font-bold text-sm ${roleColors[currentUser.role] || 'bg-gray-100 text-gray-700'}`;
         }
     }
-    // Check for existing token on page load
     window.addEventListener('load', () => {
         const savedToken = localStorage.getItem('authToken');
         if (savedToken) {
